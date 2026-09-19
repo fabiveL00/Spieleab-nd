@@ -16,7 +16,7 @@
 <title>Spieleabend Zählblock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Caveat:wght@600;700&family=Cinzel:wght@600;700;900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Caveat:wght@600;700&family=Bungee&family=Cinzel:wght@600;700;900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
 <style>
 :root{
   --paper:#fbfbf8; --card:#ffffff; --ink:#151514; --muted:#6c6c66; --rule:#dcdcd5; --rule-strong:#151514;
@@ -48,8 +48,8 @@ h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,8vw,48px);lin
 h1 small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:6px}
 .sync{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 
-nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);margin-bottom:16px}
-nav.tabs button{background:none;border:0;padding:12px 4px 10px;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;justify-content:space-between;gap:4px;border-bottom:1px solid var(--rule);margin-bottom:16px}
+nav.tabs button{background:none;border:0;padding:12px 2px 10px;font-family:var(--display);font-weight:800;font-size:clamp(14px,4.2vw,19px);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
 h2{font-family:var(--display);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:0;line-height:1}
@@ -231,7 +231,7 @@ html,body{transition:background-color .3s ease}
 }
 :root[data-game="wizard"] h1, :root[data-game="wizard"] h2, :root[data-game="wizard"] nav.tabs button{letter-spacing:.06em}
 :root[data-game="wizard"] h1{font-weight:900;color:var(--gold)}
-:root[data-game="wizard"] nav.tabs button{font-size:16px;font-weight:700}
+:root[data-game="wizard"] nav.tabs button{font-size:clamp(12px,3.4vw,16px);font-weight:700}
 :root[data-game="wizard"] nav.tabs{background:var(--paper)}
 :root[data-game="wizard"] nav.tabs button[aria-selected="true"]{color:var(--gold);border-bottom-color:var(--gold)}
 :root[data-game="wizard"] .round{border-color:var(--gold);box-shadow:0 0 0 4px var(--card), 0 0 0 5px #d8b45f55, 0 10px 40px #0008;border-radius:10px}
@@ -276,9 +276,63 @@ html,body{transition:background-color .3s ease}
 :root[data-game="padel"] .winner{border-color:var(--ball)}
 :root[data-game="padel"] h1::before{content:"● ";color:var(--ball);font-weight:400}
 @media (prefers-reduced-motion:reduce){html,body{transition:none}}
+/* Flip 7 Bauteile */
+.f7-round{display:flex;flex-direction:column;gap:12px}
+.f7-big{font-family:var(--display);font-weight:900;font-size:34px;line-height:1}
+.f7-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.f7-card{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:4px 4px 0 var(--ink)}
+.f7-card.bust{opacity:.6}
+.f7-card.bust .f7-nums, .f7-card.bust .f7-mods > :not(.bustbtn){filter:grayscale(1)}
+.f7-card.seven{box-shadow:4px 4px 0 var(--ink), 0 0 0 4px var(--seven, #22b35e)}
+.f7-head{display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:10px}
+.f7-name{font-weight:700;font-size:17px;overflow-wrap:anywhere}
+.f7-tot{font-family:var(--mono);font-weight:700;font-size:15px}
+.f7-tot small{color:var(--muted);font-weight:400;font-size:11px}
+.f7-sc{font-family:var(--display);font-size:22px;min-width:56px;text-align:right}
+.f7-card.bust .f7-sc{color:var(--mark)}
+.f7-nums{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.f7-n{aspect-ratio:3/4;max-width:100%;border:1.5px solid var(--rule);background:var(--paper);border-radius:7px;font-family:var(--display);font-size:19px;color:var(--muted);padding:0}
+.f7-n[aria-pressed="true"]{border-color:var(--ink);color:#fff;background:var(--nc,#333);transform:translateY(-2px);box-shadow:0 2px 0 var(--ink)}
+.f7-n:disabled{opacity:.3}
+.f7-mods{display:flex;flex-wrap:wrap;gap:5px}
+.f7-m{border:1.5px solid var(--rule);background:var(--paper);border-radius:999px;padding:5px 10px;font-weight:700;font-size:13px;font-family:var(--mono)}
+.f7-m[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.f7-m.bustbtn{margin-left:auto;font-family:var(--body)}
+.f7-m.bustbtn[aria-pressed="true"]{background:var(--mark);border-color:var(--mark);color:#fff}
+.f7-flag{font-family:var(--display);font-size:14px;letter-spacing:.02em;color:var(--seven,#22b35e);text-transform:uppercase}
+.f7-flag.big{font-size:15px;text-align:center;border:2px dashed var(--seven,#22b35e);border-radius:10px;padding:8px;background:var(--card)}
+.n0{--nc:#6b6b6b}.n1{--nc:#d64545}.n2{--nc:#e8772e}.n3{--nc:#c99700}.n4{--nc:#6f9a17}.n5{--nc:#1f9a55}.n6{--nc:#10948d}
+.n7{--nc:#1c80c4}.n8{--nc:#3a5bd8}.n9{--nc:#6d48d6}.n10{--nc:#a33fc4}.n11{--nc:#cc3a8c}.n12{--nc:#b8323f}
+
+/* Flip 7: Sonnengelb, dicke Karten */
+:root:root[data-game="flip7"]{
+  --paper:#ffcf33; --card:#fffaf0; --ink:#1d1a2f; --muted:#6f6a57; --rule:#e2c98a; --rule-strong:#1d1a2f;
+  --mark:#e0352b; --soft:#fff1c7; --focus:#1d1a2f; --seven:#12994f;
+  --display:"Bungee", "Arial Black", Impact, sans-serif;
+}
+:root[data-game="flip7"] body{
+  background-color:var(--paper);
+  background-image:repeating-conic-gradient(from 0deg at 50% -20%, #ffffff26 0 6deg, transparent 6deg 12deg);
+  background-attachment:fixed;
+}
+:root[data-game="flip7"] .f7-n:not([aria-pressed="true"]){background:#fff}
+:root[data-game="flip7"] .f7-m:not([aria-pressed="true"]){background:#fff}
+:root[data-game="flip7"] h1{font-weight:400;font-size:clamp(26px,7vw,40px)}
+:root[data-game="flip7"] nav.tabs button{font-weight:400;font-size:clamp(11px,3.2vw,15px);color:#6b5a1c}
+:root[data-game="flip7"] nav.tabs button[aria-selected="true"]{color:var(--ink)}
+:root[data-game="flip7"] .f7-big, :root[data-game="flip7"] .f7-sc, :root[data-game="flip7"] thead th{font-weight:400}
+:root[data-game="flip7"] thead th{font-size:14px}
+:root[data-game="flip7"] tr.total td:first-child{font-weight:400;font-size:15px}
+:root[data-game="flip7"] .sheet{border:2px solid var(--ink);border-radius:12px;box-shadow:4px 4px 0 var(--ink)}
+:root[data-game="flip7"] .btn{border-width:2px;border-radius:10px;box-shadow:3px 3px 0 var(--ink)}
+:root[data-game="flip7"] .btn.ghost{border-color:var(--ink);background:var(--card)}
+:root[data-game="flip7"] .chip{border-color:var(--ink);background:var(--card)}
+:root[data-game="flip7"] .winner{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);border-radius:14px}
+:root[data-game="flip7"] .winner .t{font-weight:400}
+:root[data-game="flip7"] .label, :root[data-game="flip7"] .sync, :root[data-game="flip7"] h1 small{color:#4a4128}
+:root[data-game="flip7"] h1::before{content:"7 ";color:var(--mark)}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
-  nav.tabs button{font-size:16px}
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
   .board-row{grid-template-columns:28px 1fr 44px 44px 54px}
 }
@@ -302,6 +356,7 @@ body{margin:0;overscroll-behavior-y:none}
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="kniffel" id="tab-kniffel">Kniffel</button>
     <button role="tab" data-tab="wizard" id="tab-wizard">Wizard</button>
+    <button role="tab" data-tab="flip7" id="tab-flip7">Flip 7</button>
     <button role="tab" data-tab="padel" id="tab-padel">Padel</button>
     <button role="tab" data-tab="board" id="tab-board">Bestenliste</button>
   </nav>
@@ -344,6 +399,7 @@ function exampleKniffel(players){
 /* ---------- Zustand ---------- */
 const defaultPlayers = ['Anna','Ben','Chris','Dana'];
 function freshWizard(players){ return {players:[...players], rounds:[], cur:0, draft:{bids:{},tricks:{}}, saved:false}; }
+function freshFlip(players){ return {players:[...players], rounds:[], cur:0, draft:{}, target:200, saved:false}; }
 function freshPadel(){ return {teams:['Anna & Ben','Chris & Dana'], sets:[[0,0]], pts:[0,0], golden:false, undo:[], done:null, saved:false, serve:0}; }
 let S;
 try { S = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) { S = null; }
@@ -353,6 +409,7 @@ if (!S || !S.players) {
 if (!S.kniffel) S.kniffel = exampleKniffel(S.players);
 if (!S.wizard) S.wizard = freshWizard(S.players);
 if (!S.padel) S.padel = freshPadel();
+if (!S.flip7) S.flip7 = freshFlip(S.players);
 let boardFilter = 'alle';
 let editingPlayers = false;
 function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {} }
@@ -503,7 +560,7 @@ function playersBlock(context){
       <form class="add" data-form="add-player"><input id="new-player" placeholder="Name" maxlength="18" autocomplete="off"><button class="btn small">Hinzufügen</button></form>
     </div>
     <div class="row between">
-      <span class="label">${context === 'wizard' ? 'Wizard: 3–6 Spieler · Änderung startet neue Partie' : 'Neue Spieler bekommen eine leere Spalte'}</span>
+      <span class="label">${context === 'wizard' ? 'Wizard: 3–6 Spieler · Änderung startet neue Partie' : context === 'flip7' ? 'Änderung startet neue Flip-7-Partie' : 'Neue Spieler bekommen eine leere Spalte'}</span>
       <button class="btn solid small" data-act="done-players">Fertig</button>
     </div>
   </div>`;
@@ -747,9 +804,102 @@ function renderPadel(){
   </div>`;
 }
 
+/* ---------- Flip 7 ---------- */
+const F7_MODS = [2,4,6,8,10];
+function f7Entry(d, p){ return d[p] || (d[p] = {nums:[], mods:[], x2:false, bust:false}); }
+function f7Score(e){
+  if (!e || e.bust) return 0;
+  const sum = e.nums.reduce((s,n) => s + n, 0);
+  return sum * (e.x2 ? 2 : 1) + e.mods.reduce((s,m) => s + m, 0) + (e.nums.length >= 7 ? 15 : 0);
+}
+function f7Totals(F){
+  const t = {}; F.players.forEach(p => t[p] = 0);
+  F.rounds.forEach(r => F.players.forEach(p => t[p] += f7Score(r[p])));
+  return t;
+}
+function renderFlip(){
+  const F = S.flip7, ps = F.players;
+  if (!ps.length) return `<div class="stack">${playersBlock('flip7')}<div class="note"><b>Keine Spieler.</b> Füge oben Spieler hinzu.</div></div>`;
+  const totals = f7Totals(F);
+  const max = Math.max(...ps.map(p => totals[p]));
+  const reached = F.rounds.length > 0 && max >= F.target;
+  const finished = reached && F.cur >= F.rounds.length;
+  const editing = F.cur < F.rounds.length;
+  const d = F.draft;
+  const before = {}; ps.forEach(p => before[p] = 0);
+  F.rounds.slice(0, F.cur).forEach(r => ps.forEach(p => before[p] += f7Score(r[p])));
+  const anyFlip7 = ps.some(p => d[p] && !d[p].bust && d[p].nums.length >= 7);
+
+  const card = p => {
+    const e = d[p] || {nums:[], mods:[], x2:false, bust:false};
+    const sc = f7Score(e), full = e.nums.length >= 7;
+    const numBtn = n => `<button class="f7-n n${n}" data-act="f7-num" data-p="${esc(p)}" data-v="${n}" aria-pressed="${e.nums.includes(n)}" aria-label="${esc(p)}: Zahl ${n}" ${full && !e.nums.includes(n) ? 'disabled' : ''}>${n}</button>`;
+    const modBtn = m => `<button class="f7-m" data-act="f7-mod" data-p="${esc(p)}" data-v="${m}" aria-pressed="${e.mods.includes(m)}">+${m}</button>`;
+    return `<div class="f7-card ${e.bust ? 'bust' : ''} ${full && !e.bust ? 'seven' : ''}">
+      <div class="f7-head">
+        <span class="f7-name">${esc(p)}</span>
+        <span class="f7-tot">${before[p] + sc}<small> / ${F.target}</small></span>
+        <span class="f7-sc">${e.bust ? 'RAUS' : (sc > 0 ? '+' + sc : '0')}</span>
+      </div>
+      <div class="f7-nums">${Array.from({length:13}, (_,n) => numBtn(n)).join('')}</div>
+      <div class="f7-mods">
+        ${F7_MODS.map(modBtn).join('')}
+        <button class="f7-m x2" data-act="f7-x2" data-p="${esc(p)}" aria-pressed="${e.x2}">×2</button>
+        <button class="f7-m bustbtn" data-act="f7-bust" data-p="${esc(p)}" aria-pressed="${e.bust}">Raus</button>
+      </div>
+      ${full && !e.bust ? `<div class="f7-flag">Flip 7! +15 Bonus</div>` : ''}
+    </div>`;
+  };
+
+  let table = '';
+  if (F.rounds.length) {
+    table = `<div class="sheet"><table>
+      <thead><tr><th>Runde</th>${ps.map(p => `<th>${esc(p)}</th>`).join('')}</tr></thead>
+      <tbody>
+      ${F.rounds.map((r,i) => {
+        const run = {}; ps.forEach(p => run[p] = 0);
+        for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += f7Score(F.rounds[j][p]));
+        return `<tr class="clickable ${F.cur === i ? 'current' : ''}" data-act="f7-edit" data-i="${i}">
+          <td class="cat">Runde ${i+1}<span>antippen zum Korrigieren</span></td>
+          ${ps.map(p => { const e = r[p]; const sc = f7Score(e);
+            const tag = e && e.bust ? '<small class="neg">raus</small>' : e && e.nums.length >= 7 ? '<small>Flip 7!</small>' : `<small>+${sc}</small>`;
+            return `<td class="wz">${run[p]}${tag}</td>`; }).join('')}
+        </tr>`; }).join('')}
+      <tr class="total"><td>Stand</td>${ps.map(p => `<td>${totals[p] === max && max > 0 ? `<span class="lead">${totals[p]}</span>` : totals[p]}</td>`).join('')}</tr>
+      </tbody></table></div>`;
+  }
+
+  return `<div class="stack">
+    ${playersBlock('flip7')}
+    ${!finished ? `<div class="f7-round">
+      <div class="row between">
+        <div><div class="label">${editing ? 'Runde korrigieren' : 'Aktuelle Runde'}</div><div class="f7-big">Runde ${F.cur + 1}</div></div>
+        <div class="label" style="text-align:right;max-width:24ch">Antippen, was jeder am Rundenende vor sich liegen hat · Ziel ${F.target}</div>
+      </div>
+      ${anyFlip7 ? `<div class="f7-flag big">Flip 7! Die Runde endet, alle anderen sichern ihre Karten.</div>` : ''}
+      <div class="f7-list">${ps.map(card).join('')}</div>
+      <div class="row between">
+        ${editing ? `<button class="btn ghost small" data-act="f7-back">Abbrechen</button>` : `<button class="btn ghost small" data-act="f7-clear">Eingaben leeren</button>`}
+        <button class="btn solid" data-act="f7-score">${editing ? 'Korrektur speichern' : 'Runde werten'}</button>
+      </div>
+    </div>` : ''}
+    ${finished && !F.saved ? `<div class="winner"><div class="label">${TITLES.flip7}</div><div class="t">${esc(ps.filter(p => totals[p] === max).join(' & '))} knackt ${F.target}</div><div class="s">Speichern, damit es in der Bestenliste landet.</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn solid" data-act="f7-finish">Ergebnis speichern</button></div></div>` : ''}
+    ${F.saved ? winnerCard('flip7', F.saved) : ''}
+    ${table}
+    <div class="row between">
+      <span class="label">Zahlen addieren · ×2 verdoppelt nur die Zahlen · dann Plus-Karten · 7 verschiedene Zahlen = +15 · raus = 0</span>
+      <div class="row">
+        <button class="btn ghost" data-act="f7-new">Neues Spiel</button>
+        ${!finished && F.rounds.length && !F.saved ? `<button class="btn" data-act="f7-finish">Vorzeitig beenden</button>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
 /* ---------- Gewinner & Titel ---------- */
-const TITLES = { kniffel:'Würfelgott', wizard:'Stich-Orakel', padel:'Herrscher der Glaswand' };
-const LOSER = { kniffel:'Pechwürfel', wizard:'Falschansager', padel:'Netzroller' };
+const TITLES = { kniffel:'Würfelgott', wizard:'Stich-Orakel', padel:'Herrscher der Glaswand', flip7:'Glückspilz' };
+const TYPE_LABEL = { kniffel:'Kniffel', wizard:'Wizard', padel:'Padel', flip7:'Flip 7' };
+const LOSER = { kniffel:'Pechwürfel', wizard:'Falschansager', padel:'Netzroller', flip7:'Pleitegeier' };
 function winnerCard(type, g){
   return `<div class="winner"><div class="label">${TITLES[type]}</div><div class="t">${esc(g.winners.join(' & '))}</div>
     <div class="s">${g.ranking.map((r,i) => `${i+1}. ${esc(r.name)} (${r.score})`).join(' · ')}</div>
@@ -786,7 +936,7 @@ function renderBoard(){
       <div class="row"><input id="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" aria-label="Gruppen-PIN"><button class="btn solid small">Verbinden</button></div>
     </form>` : ''}
     ${pinError ? `<div class="note" style="color:var(--mark);border-color:var(--mark)">${esc(pinError)}</div>` : ''}
-    <div class="row between"><h2>Ewige Tabelle</h2><div class="filters">${filterBtn('alle','Alle')}${filterBtn('kniffel','Kniffel')}${filterBtn('wizard','Wizard')}${filterBtn('padel','Padel')}</div></div>
+    <div class="row between"><h2>Ewige Tabelle</h2><div class="filters">${filterBtn('alle','Alle')}${filterBtn('kniffel','Kniffel')}${filterBtn('wizard','Wizard')}${filterBtn('flip7','Flip 7')}${filterBtn('padel','Padel')}</div></div>
     ${rows.length ? `<div class="board">
       <div class="board-row head"><span>#</span><span>Spieler</span><span>Siege</span><span>Spiele</span><span>Quote</span></div>
       ${rows.map((r,i) => { const q = Math.round(100 * r.wins / r.played);
@@ -798,7 +948,7 @@ function renderBoard(){
     </div>` : `<div class="board"><div class="empty-state"><b>Noch keine Spiele</b>Beendet eine Partie Kniffel, Wizard oder Padel, dann taucht hier auf, wer den Abend dominiert.</div></div>`}
     ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele</div><div class="log">
       ${list.slice(0,30).map(g => `<div class="log-item">
-        <span class="type">${g.type}</span>
+        <span class="type">${TYPE_LABEL[g.type] || g.type}</span>
         <span class="res"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}</span></span>
         <button class="x" data-act="del-game" data-id="${esc(g.id)}" aria-label="Spiel löschen" title="Spiel löschen">×</button>
       </div>`).join('')}
@@ -812,10 +962,10 @@ function renderBoard(){
 function render(){
   document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === S.tab));
   document.documentElement.dataset.game = S.tab;
-  const tc = {kniffel:'#f5f6f0', wizard:'#0d1130', padel:'#0f3d73'}[S.tab];
+  const tc = {kniffel:'#f5f6f0', wizard:'#0d1130', padel:'#0f3d73', flip7:'#ffcf33'}[S.tab];
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', tc || (m.media.includes('dark') ? '#111110' : '#fbfbf8')));
   const app = $('#app');
-  app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : renderBoard();
+  app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : S.tab === 'flip7' ? renderFlip() : renderBoard();
 }
 
 document.querySelector('nav.tabs').addEventListener('click', e => {
@@ -831,6 +981,7 @@ function applyPlayers(){
   ps.forEach(p => { S.kniffel.scores[p] = S.kniffel.scores[p] || {}; });
   // Wizard: bei geänderter Besetzung neue Partie
   if (JSON.stringify(S.wizard.players) !== JSON.stringify(ps)) S.wizard = freshWizard(ps);
+  if (JSON.stringify(S.flip7.players) !== JSON.stringify(ps)) S.flip7 = freshFlip(ps);
 }
 
 const app = $('#app');
@@ -845,6 +996,40 @@ app.addEventListener('click', async e => {
   if (a === 'k-finish') {
     const res = buildResult('kniffel', S.players.map(p => ({name:p, score:kTotals(S.kniffel.scores[p]).total})));
     S.kniffel.saved = res; save(); render(); confetti(); await recordGame({...res}); return;
+  }
+
+  const F = S.flip7;
+  if (a.startsWith('f7-')) {
+    const p = el.dataset.p;
+    if (a === 'f7-num') {
+      const e = f7Entry(F.draft, p), v = +el.dataset.v;
+      e.nums = e.nums.includes(v) ? e.nums.filter(x => x !== v) : (e.nums.length < 7 ? [...e.nums, v].sort((x,y) => x-y) : e.nums);
+      save(); render(); if (e.nums.length === 7 && !e.bust) confetti(); return;
+    }
+    if (a === 'f7-mod') {
+      const e = f7Entry(F.draft, p), v = +el.dataset.v;
+      e.mods = e.mods.includes(v) ? e.mods.filter(x => x !== v) : [...e.mods, v]; save(); render(); return;
+    }
+    if (a === 'f7-x2') { const e = f7Entry(F.draft, p); e.x2 = !e.x2; save(); render(); return; }
+    if (a === 'f7-bust') { const e = f7Entry(F.draft, p); e.bust = !e.bust; save(); render(); return; }
+    if (a === 'f7-clear') { F.draft = {}; save(); render(); return; }
+    if (a === 'f7-score') {
+      const r = {};
+      F.players.forEach(pl => { r[pl] = JSON.parse(JSON.stringify(F.draft[pl] || {nums:[], mods:[], x2:false, bust:false})); });
+      if (F.cur < F.rounds.length) F.rounds[F.cur] = r; else F.rounds.push(r);
+      F.cur = F.rounds.length; F.draft = {}; F.saved = false; save(); render();
+      const t = f7Totals(F); if (Math.max(...F.players.map(pl => t[pl])) >= F.target) confetti();
+      window.scrollTo({top:0, behavior:'smooth'}); return;
+    }
+    if (a === 'f7-edit') { const i = +el.dataset.i; F.cur = i; F.draft = JSON.parse(JSON.stringify(F.rounds[i])); save(); render(); window.scrollTo({top:0, behavior:'smooth'}); return; }
+    if (a === 'f7-back') { F.cur = F.rounds.length; F.draft = {}; save(); render(); return; }
+    if (a === 'f7-new') { S.flip7 = freshFlip(S.players); save(); render(); return; }
+    if (a === 'f7-finish') {
+      const t = f7Totals(F);
+      const res = buildResult('flip7', F.players.map(pl => ({name:pl, score:t[pl]})));
+      F.saved = res; F.cur = F.rounds.length; save(); render(); confetti(); await recordGame({...res}); return;
+    }
+    return;
   }
 
   const W = S.wizard;
