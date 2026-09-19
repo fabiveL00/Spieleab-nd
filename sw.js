@@ -1,10 +1,14 @@
 // Spieleabend – Offline-Cache
-const CACHE = 'spieleabend-v9';
+const CACHE = 'spieleabend-v10';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+// Optional, darf fehlen (z. B. wenn die Devs das Münzbild entfernen)
+const OPTIONAL = ['./coin-kopf.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE)
+    .then(c => c.addAll(CORE).then(() => Promise.all(OPTIONAL.map(u => c.add(u).catch(() => {})))))
+    .then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
@@ -22,8 +26,17 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.match('./index.html')));
     return;
   }
-  // Schriften und eigene Dateien: erst Cache, sonst Netz und merken
-  if (url.origin === location.origin || url.host.endsWith('fonts.googleapis.com') || url.host.endsWith('fonts.gstatic.com')) {
+  // Eigene Dateien (Icons, Münzbild): sofort aus dem Cache, im Hintergrund aktualisieren.
+  // So erscheint ein im Repo ausgetauschtes Bild spätestens beim nächsten Öffnen.
+  if (url.origin === location.origin) {
+    e.respondWith(caches.open(CACHE).then(c => c.match(req).then(hit => {
+      const net = fetch(req).then(r => { if (r.ok) c.put(req, r.clone()); return r; }).catch(() => hit);
+      return hit || net;
+    })));
+    return;
+  }
+  // Schriften: erst Cache, sonst Netz und merken
+  if (url.host.endsWith('fonts.googleapis.com') || url.host.endsWith('fonts.gstatic.com')) {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
       if (r.ok || r.type === 'opaque') { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
       return r;

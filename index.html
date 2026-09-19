@@ -478,6 +478,29 @@ body.sheet-open{overflow:hidden}
 .acc-main small{color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .acc-meta{font-size:11px;color:var(--muted);text-align:right}
 
+/* Bilder */
+.ava.img{padding:0;overflow:hidden;background:var(--soft);border-color:var(--rule)}
+.ava.img img{width:100%;height:100%;object-fit:cover;display:block}
+.me-btn .ava.img{border-radius:50%}
+.photo-edit{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.photo-edit .ava.big{width:88px;height:88px;font-size:40px}
+.file-btn{position:relative;cursor:pointer;display:inline-flex;align-items:center}
+.file-btn.disabled{opacity:.35;pointer-events:none}
+.file-btn:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+
+/* Münze 3D */
+.coin-jump{display:inline-block}
+.coin-jump.jump{animation:coinjump 1.2s cubic-bezier(.3,.7,.4,1)}
+@keyframes coinjump{0%{transform:translateY(0)}45%{transform:translateY(-70px)}100%{transform:translateY(0)}}
+.coin3d{width:150px;height:150px;position:relative;transform-style:preserve-3d;transform:rotateY(var(--rot,0deg));transition:transform 1.2s cubic-bezier(.2,.7,.3,1)}
+.coin3d .face{position:absolute;inset:0;border-radius:50%;border:5px solid var(--ink);background:var(--card);display:flex;align-items:center;justify-content:center;overflow:hidden;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:inset 0 0 0 8px var(--soft)}
+.coin3d .face span{font-family:var(--display);font-size:64px;font-weight:900}
+.coin3d .face img{width:100%;height:100%;object-fit:cover}
+.coin3d .tail{transform:rotateY(180deg)}
+.coin-admin{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
+@media (prefers-reduced-motion:reduce){.coin3d{transition:none}}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -1375,16 +1398,74 @@ const errText = e => !e.status ? 'Keine Verbindung.' : e.status === 404 ? 'Konte
 async function fetchProfiles(){
   try {
     const rows = await rpc('list_accounts');
-    const map = {}; (rows || []).forEach(r => map[nkey(r.name)] = {name:r.name, emoji:r.emoji || '', motto:r.motto || '', since:r.since});
+    const map = {}; (rows || []).forEach(r => map[nkey(r.name)] = {name:r.name, emoji:r.emoji || '', motto:r.motto || '', since:r.since, photo_v: r.photo_v || 0});
     profiles = map; store(LS_PROFILES, profiles);
+    await syncPhotos();
     if (session && !profiles[nkey(session.name)]) { session = null; store(LS_SESSION, null); }
     renderMeBtn();
   } catch(e) { /* Funktion fehlt oder offline: Cache nutzen */ }
 }
 function profileOf(name){ return profiles[nkey(name)] || null; }
+
+/* Profilbilder: klein gerechnet, in Supabase gespeichert, lokal zwischengespeichert */
+const LS_PHOTOS = 'spieleabend.photos.v1';
+let photos = load(LS_PHOTOS, {});   // key -> {v, data}
+function savePhotos(){ try { localStorage.setItem(LS_PHOTOS, JSON.stringify(photos)); } catch(e) { /* Speicher voll: nur im Speicher behalten */ } }
+async function syncPhotos(){
+  let changed = false;
+  for (const [k, p] of Object.entries(profiles)) {
+    const v = p.photo_v || 0;
+    if (!v) { if (photos[k]) { delete photos[k]; changed = true; } continue; }
+    if (photos[k] && photos[k].v === v) continue;
+    try { const data = await rpc('get_photo', {p_name: p.name}); if (data) { photos[k] = {v, data}; changed = true; } } catch(e) {}
+  }
+  Object.keys(photos).forEach(k => { if (!profiles[k]) { delete photos[k]; changed = true; } });
+  if (changed) { savePhotos(); renderMeBtn(); if (S.tab === 'board') render(); if (sheetView && ['profile','account','me'].includes(sheetView.kind)) renderSheet(); }
+}
+function photoOf(name){ const x = photos[nkey(name)]; return x ? x.data : null; }
+// Bild quadratisch zuschneiden und verkleinern
+async function imageFileToDataURL(file, size){
+  if (!file || !/^image\//.test(file.type || 'image/')) throw new Error('Das ist kein Bild.');
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Bild konnte nicht gelesen werden.')); i.src = url; });
+    const s = Math.min(img.naturalWidth, img.naturalHeight);
+    const c = document.createElement('canvas'); c.width = c.height = size;
+    const x = c.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, size, size);
+    x.drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, size, size);
+    return c.toDataURL('image/jpeg', 0.82);
+  } finally { URL.revokeObjectURL(url); }
+}
+async function setMyPhoto(data){
+  if (!session) return;
+  try {
+    const v = await rpc('set_photo', {p_token: session.token, p_data: data});
+    const k = nkey(session.name);
+    profiles[k] = {...(profiles[k] || {name: session.name}), photo_v: data ? v : 0}; store(LS_PROFILES, profiles);
+    if (data) photos[k] = {v, data}; else delete photos[k];
+    savePhotos(); renderMeBtn(); toast(data ? 'Profilbild gespeichert.' : 'Profilbild entfernt.');
+    renderSheet(); if (S.tab === 'board') render();
+  } catch(e) { toast('Bild nicht gespeichert: ' + errText(e)); }
+}
+
+/* =====================================================================
+   DEV-EINSTELLUNG · Münzbild (nur hier im Code, nicht in der App änderbar)
+   Die Kopf-Seite zeigt die Bilddatei, die neben index.html im Repo liegt.
+   Tauschen: im GitHub-Repo eine neue Datei mit demselben Namen hochladen.
+   Anderer Dateiname: hier eintragen. Leer lassen ('') = einfaches "K".
+   Tipp: quadratisch, mindestens 400 × 400 px, Motiv mittig (wird rund zugeschnitten).
+   ===================================================================== */
+const COIN_HEAD_IMAGE = 'coin-kopf.png';
+const COIN_TAIL_IMAGE = '';            // optional, z. B. 'coin-zahl.png'
+function coinFace(src, fallback, alt){
+  return src ? `<img src="${esc(src)}" alt="${alt}" onerror="this.outerHTML='<span>${fallback}</span>'">` : `<span>${fallback}</span>`;
+}
+
 function isMe(name){ return !!session && nkey(session.name) === nkey(name); }
 function avatar(name, big){
-  const p = profileOf(name);
+  const p = profileOf(name), ph = photoOf(name);
+  if (ph) return `<span class="ava img ${big ? 'big' : ''}" aria-hidden="true"><img src="${ph}" alt=""></span>`;
   const inner = p && p.emoji ? esc(p.emoji) : esc((String(name).trim()[0] || '?').toUpperCase());
   return `<span class="ava ${big ? 'big' : ''} ${p && p.emoji ? 'emo' : ''} ${p ? 'acc' : ''}" aria-hidden="true">${inner}</span>`;
 }
@@ -1662,10 +1743,15 @@ const SHEETS = {
   },
 
   coin(v){
+    v.rot = v.rot || 0;
     return `${back}<h2>Münze werfen</h2>
-      <div class="coin-stage"><div class="coin ${v.flipping ? 'flip' : ''}" id="coin">${v.side ? (v.side === 'Kopf' ? 'K' : 'Z') : '?'}</div></div>
+      <div class="coin-stage"><div class="coin-jump" id="coin-jump"><div class="coin3d" id="coin3d" style="--rot:${v.rot}deg">
+        <div class="face head">${coinFace(COIN_HEAD_IMAGE, 'K', 'Kopf')}</div>
+        <div class="face tail">${coinFace(COIN_TAIL_IMAGE, 'Z', 'Zahl')}</div>
+      </div></div></div>
       <div class="pick-result" aria-live="polite">${v.side && !v.flipping ? `<b>${v.side}</b>` : ''}</div>
-      <div class="row" style="justify-content:center"><button class="btn solid" data-x="coin-flip">Werfen</button></div>`;
+      <div class="row" style="justify-content:center"><button class="btn solid" data-x="coin-flip" ${v.flipping ? 'disabled' : ''}>Werfen</button></div>
+      <span class="label" style="text-align:center">Kopf zeigt das Gruppen-Motiv · Zahl zeigt Z</span>`;
   },
 
   teams(v){
@@ -1744,6 +1830,17 @@ const SHEETS = {
     if (v.edit && mine) {
       const EMOJIS = ['🦊','🐻','🐼','🦁','🐯','🐸','🐙','🦄','🐺','🦉','🐧','🐢','🔥','⚡','🌵','🍕','🎩','👑','🎯','🚀','🍀','💎','🥨','🐉'];
       return `<button class="btn ghost small sheet-back-btn" data-x="profile-view">← Zurück</button><h2>Profil bearbeiten</h2>
+        <div class="photo-edit">
+          <span class="ava big ${photoOf(name) ? 'img' : ''}">${photoOf(name) ? `<img src="${photoOf(name)}" alt="Dein Profilbild">` : esc((p.emoji || name[0] || '?'))}</span>
+          <div class="stack" style="gap:6px">
+            <div class="label">Profilbild</div>
+            <div class="row">
+              <label class="btn small file-btn">${photoOf(name) ? 'Bild ändern' : 'Bild hochladen'}<input type="file" accept="image/*" id="photo-file" hidden></label>
+              ${photoOf(name) ? `<button type="button" class="btn ghost small" data-x="photo-del">Bild löschen</button>` : ''}
+            </div>
+            <span class="muted">Wird quadratisch zugeschnitten. Ohne Bild wird das Emoji angezeigt.</span>
+          </div>
+        </div>
         <form class="stack" data-xform="profile" style="gap:12px">
           <div><div class="label" style="margin-bottom:6px">Emoji</div>
             <div class="emoji-grid">${EMOJIS.map(e => `<button type="button" class="emo-btn" data-x="emo" data-e="${e}" aria-pressed="${(v.emoji ?? p.emoji) === e}">${e}</button>`).join('')}
@@ -1908,10 +2005,19 @@ sheetEl.addEventListener('click', e => {
     step(); return;
   }
   if (x === 'coin-flip') {
+    const side = Math.random() < .5 ? 'Kopf' : 'Zahl';
+    const newRot = Math.ceil(((v.rot || 0) + 1440) / 360) * 360 + (side === 'Zahl' ? 180 : 0) + 360;
     v.flipping = true; v.side = null; renderSheet();
-    setTimeout(() => { v.flipping = false; v.side = Math.random() < .5 ? 'Kopf' : 'Zahl'; renderSheet(); }, 900);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    requestAnimationFrame(() => {
+      const c = $('#coin3d'), j = $('#coin-jump');
+      if (c) c.style.setProperty('--rot', newRot + 'deg');
+      if (j && !reduce) { j.classList.remove('jump'); void j.offsetWidth; j.classList.add('jump'); }
+    });
+    setTimeout(() => { v.flipping = false; v.side = side; v.rot = newRot; if (sheetView === v) renderSheet(); }, reduce ? 50 : 1250);
     return;
   }
+  if (x === 'photo-del') { setMyPhoto(null); return; }
   if (x === 'teams-k') { v.k = +el.dataset.n; v.teams = null; renderSheet(); return; }
   if (x === 'teams-go') {
     const names = [...currentRoster()];
@@ -1941,7 +2047,15 @@ sheetEl.addEventListener('click', e => {
   if (x === 'profile-view') { v.edit = false; v.pw = false; v.err = ''; v.emoji = undefined; v.motto = undefined; renderSheet(); return; }
   if (x === 'emo') { v.motto = $('#motto').value; v.emoji = el.dataset.e; renderSheet(); return; }
 });
-sheetEl.addEventListener('change', e => {
+sheetEl.addEventListener('change', async e => {
+  if (e.target.id === 'photo-file') {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    try {
+      const data = await imageFileToDataURL(f, 256);
+      await setMyPhoto(data);
+    } catch(err) { toast(err.message || 'Bild konnte nicht gelesen werden.'); }
+    return;
+  }
   if (e.target.id === 'set-live') { S.liveShare = e.target.checked; save(); if (!S.liveShare) liveClear(); else liveSchedule(); }
   if (e.target.id === 'set-wake') { S.wake = e.target.checked; save(); updateWake(); }
 });
