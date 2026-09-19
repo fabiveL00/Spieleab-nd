@@ -568,6 +568,33 @@ header.top .me-btn .ava.acc:not(.emo):not(.img){background:#fbfbf8;color:#151514
 .quick{display:flex;flex-wrap:wrap;gap:8px}
 .quick button{border:1.5px solid var(--rule);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px}
 
+/* Padel: Sätze eintragen */
+.padel-mode button{font-weight:700}
+.psets{display:flex;flex-direction:column;border:1.5px solid var(--rule-strong);border-radius:6px;background:var(--card);overflow:hidden}
+.pset{display:grid;grid-template-columns:50px 1fr 12px 1fr 30px;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--rule)}
+.pset:last-child{border-bottom:0}
+.pset.head{padding-block:10px}
+.pset.head input{border:0;background:transparent;font-weight:700;font-size:14px;text-overflow:ellipsis;text-align:center;width:100%;min-width:0;color:var(--ink);padding:4px}
+.pset.head input:focus{outline:2px solid var(--focus);border-radius:4px}
+.ps-label{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ps-step{justify-self:center}
+.ps-step output{font-size:22px;width:38px}
+.ps-colon{text-align:center;font-size:20px}
+.pset.w0 .ps-step:nth-of-type(1) output,.pset.w1 .ps-step:nth-of-type(2) output{color:var(--mark)}
+:root[data-game="padel"] .psets{background:#07182c;border:2px solid #fff;border-radius:6px}
+:root[data-game="padel"] .pset{border-bottom-color:#ffffff26}
+:root[data-game="padel"] .pset.head input{color:#fff}
+:root[data-game="padel"] .ps-label{color:#8fa6c4}
+:root[data-game="padel"] .ps-step{border-color:#ffffff33}
+:root[data-game="padel"] .ps-step button{background:#0f3d73;color:#fff}
+:root[data-game="padel"] .ps-step output{color:#fff;font-family:var(--mono)}
+:root[data-game="padel"] .pset.w0 .ps-step:nth-of-type(1) output,:root[data-game="padel"] .pset.w1 .ps-step:nth-of-type(2) output{color:var(--ball)}
+:root[data-game="padel"] .padel-mode{border-color:#fff}
+:root[data-game="padel"] .padel-mode button{background:transparent;color:#fff}
+:root[data-game="padel"] .padel-mode button[aria-pressed="true"]{background:var(--ball);color:#0b2440}
+:root[data-game="padel"] .padel-mode button+button{border-left-color:#fff}
+:root[data-game="padel"] .x{color:#b7cbe6}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -1010,7 +1037,7 @@ function pPoint(t){
   save(); render();
   if (P.done !== null) confetti();
 }
-function renderPadel(){
+function renderPadelPoints(){
   const P = S.padel, D = pDisplay(P), w = setsWon(P);
   const setCell = (i, t) => {
     const s = P.sets[i]; if (!s) return `<div class="set"></div>`;
@@ -1044,7 +1071,41 @@ function renderPadel(){
         <button class="btn ghost" data-act="p-new">Neues Match</button>
       </div>
     </div>
-    <span class="label">Namen mit „&“ trennen</span>
+  </div>`;
+}
+
+/* Padel: Standard = nur Satzergebnisse eintragen, Punkte live nur auf Wunsch */
+function padelSetWins(P){ const w = [0,0]; P.sets.forEach(([a,b]) => { if (a > b) w[0]++; else if (b > a) w[1]++; }); return w; }
+function renderPadel(){
+  const P = S.padel, mode = P.mode || 'sets';
+  const toggle = `<div class="seg wide padel-mode" role="group" aria-label="Zählweise">
+    <button data-act="p-mode" data-m="sets" aria-pressed="${mode === 'sets'}">Sätze eintragen</button>
+    <button data-act="p-mode" data-m="points" aria-pressed="${mode === 'points'}">Punkte live</button></div>`;
+  if (mode === 'points') return `<div class="stack">${viewMode ? '' : toggle}${renderPadelPoints()}</div>`;
+  const w = padelSetWins(P), leader = w[0] === w[1] ? null : (w[0] > w[1] ? 0 : 1);
+  const played = P.sets.some(x => x[0] + x[1] > 0), locked = !!P.saved;
+  const step = (i, t) => `<div class="step ps-step">
+      <button data-act="ps-step" data-i="${i}" data-t="${t}" data-d="-1" aria-label="Satz ${i+1} ${esc(P.teams[t])} weniger" ${locked ? 'disabled' : ''}>−</button>
+      <output>${P.sets[i][t]}</output>
+      <button data-act="ps-step" data-i="${i}" data-t="${t}" data-d="1" aria-label="Satz ${i+1} ${esc(P.teams[t])} mehr" ${locked ? 'disabled' : ''}>+</button></div>`;
+  return `<div class="stack">
+    ${viewMode ? '' : toggle}
+    <div class="psets">
+      <div class="pset head"><span></span>
+        <input id="team-0" data-team="0" value="${esc(P.teams[0])}" aria-label="Name Team 1" maxlength="30" ${locked ? 'disabled' : ''}>
+        <span></span>
+        <input id="team-1" data-team="1" value="${esc(P.teams[1])}" aria-label="Name Team 2" maxlength="30" ${locked ? 'disabled' : ''}>
+        <span></span></div>
+      ${P.sets.map((x, i) => `<div class="pset ${x[0] > x[1] ? 'w0' : x[1] > x[0] ? 'w1' : ''}">
+        <span class="ps-label">Satz ${i+1}</span>${step(i,0)}<b class="ps-colon">:</b>${step(i,1)}
+        ${P.sets.length > 1 && !locked ? `<button class="x" data-act="ps-del" data-i="${i}" aria-label="Satz ${i+1} entfernen">×</button>` : '<span></span>'}
+      </div>`).join('')}
+    </div>
+    ${!locked && P.sets.length < 5 ? `<div class="row"><button class="btn ghost small" data-act="ps-add">+ Satz</button></div>` : ''}
+    <div class="status">${played ? `Sätze ${w[0]} : ${w[1]}${leader !== null ? ` · ${esc(P.teams[leader])} ${locked ? 'gewinnt' : 'vorne'}` : ''}` : 'Satzergebnisse eintragen'}</div>
+    ${!locked && leader !== null ? `<div class="row" style="justify-content:center"><button class="btn solid" data-act="p-finish">Ergebnis speichern</button></div>` : ''}
+    ${P.saved ? winnerCard('padel', P.saved) : ''}
+    <div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="p-new">Neues Match</button></div>
   </div>`;
 }
 
@@ -1378,9 +1439,25 @@ app.addEventListener('click', async e => {
     const o = JSON.parse(last); P.sets = o.sets; P.pts = o.pts; P.serve = o.serve; P.done = null; P.saved = false;
     save(); render(); return;
   }
-  if (a === 'p-new') { const teams = P.teams, golden = P.golden; S.padel = freshPadel(); S.padel.teams = teams; S.padel.golden = golden; save(); render(); return; }
+  if (a === 'p-new') { const teams = P.teams, golden = P.golden, mode = P.mode; S.padel = freshPadel(); S.padel.teams = teams; S.padel.golden = golden; S.padel.mode = mode; save(); render(); return; }
+  if (a === 'p-mode') {
+    const m = el.dataset.m; if ((P.mode || 'sets') === m) return;
+    P.mode = m;
+    if (m === 'points' && !P.saved) {
+      // weiterzählen: abgeschlossenen letzten Satz nicht weiterführen, Sieger erkennen
+      const w = setsWon(P); P.done = w[0] >= 2 ? 0 : w[1] >= 2 ? 1 : null; P.pts = [0,0]; P.undo = [];
+      const L = P.sets[P.sets.length - 1], fin = (L[0] >= 6 || L[1] >= 6) && (Math.abs(L[0] - L[1]) >= 2 || L[0] === 7 || L[1] === 7);
+      if (P.done === null && fin) P.sets.push([0,0]);
+    }
+    if (m === 'sets' && P.sets.length > 1) { const L = P.sets[P.sets.length - 1]; if (L[0] + L[1] === 0) P.sets.pop(); }
+    save(); render(); return;
+  }
+  if (a === 'ps-step') { if (P.saved) return; const i = +el.dataset.i, t = +el.dataset.t; P.sets[i][t] = Math.max(0, Math.min(9, P.sets[i][t] + (+el.dataset.d))); save(); render(); return; }
+  if (a === 'ps-add') { if (P.sets.length < 5) P.sets.push([0,0]); save(); render(); return; }
+  if (a === 'ps-del') { P.sets.splice(+el.dataset.i, 1); if (!P.sets.length) P.sets.push([0,0]); save(); render(); return; }
   if (a === 'p-finish') {
-    const w = setsWon(P);
+    const w = (P.mode || 'sets') === 'sets' ? padelSetWins(P) : setsWon(P);
+    if ((P.mode || 'sets') === 'sets') { if (w[0] === w[1]) return; P.done = w[0] > w[1] ? 0 : 1; P.sets = P.sets.filter(x => x[0] + x[1] > 0); }
     const res = buildResult('padel', [{name:P.teams[0], score:w[0]}, {name:P.teams[1], score:w[1]}]);
     P.saved = res; save(); render(); await recordGame({...res, detail:{teams:[...P.teams], sets:JSON.parse(JSON.stringify(P.sets)), winner:P.done}}); return;
   }

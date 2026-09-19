@@ -1,5 +1,5 @@
 // Spieleabend – Offline-Cache
-const CACHE = 'spieleabend-v11';
+const CACHE = 'spieleabend-v12';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 // Optional, darf fehlen (z. B. wenn die Devs das Münzbild entfernen)
