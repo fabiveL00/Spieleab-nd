@@ -49,7 +49,7 @@ h1 small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;le
 .sync{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 
 nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;justify-content:space-between;gap:4px;border-bottom:1px solid var(--rule);margin-bottom:16px}
-nav.tabs button{background:none;border:0;padding:12px 2px 10px;font-family:var(--display);font-weight:800;font-size:clamp(13px,3.8vw,19px);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+nav.tabs button{background:none;border:0;padding:12px 2px 10px;font-family:var(--display);font-weight:800;font-size:clamp(14px,4.2vw,19px);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
 h2{font-family:var(--display);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:0;line-height:1}
@@ -501,6 +501,73 @@ body.sheet-open{overflow:hidden}
 .coin-admin{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--rule);padding-top:12px}
 @media (prefers-reduced-motion:reduce){.coin3d{transition:none}}
 
+/* ================= Frontend 2: Banner + Startseite ================= */
+.wrap{padding-block:0 64px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:#151514;color:#fbfbf8;margin-inline:-16px;margin-bottom:16px;
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap;border-bottom:0}
+@media (min-width:792px){ header.top{margin-inline:calc(380px - 50vw);padding-inline:calc(50vw - 364px)} }
+header.top h1{margin:0;font-size:inherit;line-height:1;min-width:0}
+header.top h1::before{content:none!important}
+.brand{font-family:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif!important;font-weight:900;font-size:clamp(24px,6.6vw,36px);letter-spacing:.03em;text-transform:uppercase;
+  color:#fbfbf8!important;background:none;border:0;padding:4px 0;line-height:1;display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.brand .back{font-weight:700;font-size:.9em;opacity:.65;margin-top:-.08em}
+body[data-view="home"] .brand .back{display:none}
+.brand:focus-visible{outline:2px solid #fbfbf8;outline-offset:3px}
+header.top .top-right{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.hbtn{border:1.5px solid #fbfbf855;background:transparent;color:#fbfbf8;border-radius:999px;height:36px;padding:0 12px;font:600 13.5px "Instrument Sans",system-ui,sans-serif;white-space:nowrap}
+.hbtn:focus-visible{outline:2px solid #fbfbf8;outline-offset:2px}
+header.top .me-btn{border:1.5px solid #fbfbf8;background:#2b2b29;color:#fbfbf8;width:36px;height:36px}
+header.top .me-btn .me-empty{color:#fbfbf8}
+header.top .me-btn .ava.acc:not(.emo):not(.img){background:#fbfbf8;color:#151514}
+.sync{display:inline-block;width:9px;height:9px;border-radius:50%;background:#8a8a84;flex:none}
+.sync[data-s="ok"]{background:#3fb950}
+.sync[data-s="wait"]{background:#e3b341}
+.sync[data-s="off"]{background:#e5534b}
+.sync[data-s="nopin"]{background:#8a8a84}
+@media (max-width:440px){ .hbtn{width:36px;padding:0;font-size:0;display:inline-flex;align-items:center;justify-content:center} .hbtn::before{content:"⚄";font-size:19px;line-height:1} }
+
+.home{display:flex;flex-direction:column;gap:14px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (min-width:640px){ .modes{grid-template-columns:repeat(4,1fr)} }
+.mode{position:relative;overflow:hidden;aspect-ratio:1/1.05;border-radius:18px;border:0;padding:14px;text-align:left;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;cursor:pointer;
+  box-shadow:0 1px 0 #0001, 0 6px 18px #0000001a;transition:transform .12s ease}
+.mode:active{transform:scale(.97)}
+.mode:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.mode-name{position:relative;font-size:28px;line-height:1;text-transform:uppercase}
+.mode-state{position:relative;font:600 12px "JetBrains Mono",ui-monospace,monospace;letter-spacing:.02em;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mode-state.live{opacity:1}
+.mode-state.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px;animation:pulse 1.4s ease-in-out infinite}
+.mode-art{position:absolute;inset:0;pointer-events:none}
+/* Kniffel: Block mit Karos und Würfel */
+.mode-kniffel{background:#f5f6f0;color:#1b2847;background-image:repeating-linear-gradient(0deg,#1d4fbf14 0 1px,transparent 1px 16px),repeating-linear-gradient(90deg,#1d4fbf14 0 1px,transparent 1px 16px)}
+.mode-kniffel .mode-name{font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:900;font-size:34px}
+.mode-kniffel .mode-state{color:#1d4fbf}
+.mode-kniffel .mode-art{top:14px;left:auto;right:14px;bottom:auto;width:54px;height:54px;inset:14px 14px auto auto;background:#fff;border:2.5px solid #1b2847;border-radius:12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:6px;transform:rotate(9deg)}
+.mode-kniffel .pip{width:9px;height:9px;border-radius:50%;background:#1b2847;place-self:center}
+.mode-kniffel .pip:nth-child(1){grid-area:1/1}.mode-kniffel .pip:nth-child(2){grid-area:1/3}.mode-kniffel .pip:nth-child(3){grid-area:2/2}.mode-kniffel .pip:nth-child(4){grid-area:3/1}.mode-kniffel .pip:nth-child(5){grid-area:3/3}
+/* Wizard: Sternennacht, Gold */
+.mode-wizard{background:#0d1130;color:#d8b45f;background-image:radial-gradient(1.4px 1.4px at 20% 30%,#fff9 50%,transparent 51%),radial-gradient(1px 1px at 70% 18%,#fffa 50%,transparent 51%),radial-gradient(1.2px 1.2px at 55% 55%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 85% 60%,#fff9 50%,transparent 51%),radial-gradient(1.3px 1.3px at 30% 75%,#fff7 50%,transparent 51%),radial-gradient(ellipse at 50% -10%,#2a2f78,transparent 70%)}
+.mode-wizard .mode-name{font-family:"Cinzel",Georgia,serif;font-weight:900;font-size:25px;letter-spacing:.05em}
+.mode-wizard .mode-state{color:#f3ead3}
+.mode-wizard .mode-art{display:flex;justify-content:flex-end;padding:10px 16px;font-size:44px;color:#d8b45f;text-shadow:0 0 18px #d8b45f88}
+/* Flip 7: Sonnengelb, dicke 7 */
+.mode-flip7{background:#ffcf33;color:#1d1a2f;background-image:repeating-conic-gradient(from 0deg at 50% -20%,#ffffff2e 0 6deg,transparent 6deg 12deg)}
+.mode-flip7 .mode-name{font-family:"Bungee","Arial Black",Impact,sans-serif;font-size:24px}
+.mode-flip7 .mode-state{color:#1d1a2f}
+.mode-flip7 .mode-art{display:flex;justify-content:flex-end;align-items:flex-start;padding:4px 14px;font:400 74px/1 "Bungee","Arial Black",Impact,sans-serif;color:#e0352b;text-shadow:3px 3px 0 #1d1a2f}
+/* Padel: Court und Ball */
+.mode-padel{background:#0f3d73;color:#fff;background-image:linear-gradient(90deg,transparent calc(50% - 1px),#ffffff40 calc(50% - 1px) calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(0deg,transparent 0 58%,#ffffff40 58% calc(58% + 2px),transparent calc(58% + 2px))}
+.mode-padel .mode-name{font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:900;font-size:34px}
+.mode-padel .mode-state{color:#e4f34c}
+.mode-padel .ball{position:absolute;top:16px;right:18px;width:40px;height:40px;border-radius:50%;background:#e4f34c;box-shadow:0 0 18px #e4f34c88;
+  background-image:radial-gradient(circle at -20% 50%,transparent 0 58%,#fff 59% 63%,transparent 64%),radial-gradient(circle at 120% 50%,transparent 0 58%,#fff 59% 63%,transparent 64%)}
+.mode-wide{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid var(--ink);background:var(--card);border-radius:14px;padding:14px 16px;text-align:left;cursor:pointer}
+.mode-wide b{display:block;font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:900;font-size:26px;text-transform:uppercase;line-height:1}
+.mode-wide small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.mode-wide .arrow{font-size:30px;line-height:1}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.quick button{border:1.5px solid var(--rule);background:var(--card);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -520,16 +587,10 @@ body{margin:0;overscroll-behavior-y:none}
 
 <div class="wrap">
   <header class="top">
-    <h1>Spieleabend<small>Zählblock · Kniffel · Wizard · Flip 7 · Padel</small></h1>
-    <div class="top-right"><span class="sync" id="sync">auf diesem Gerät gespeichert</span><button class="btn ghost small" id="extras-btn" aria-label="Extras öffnen">⚄ Extras</button><button class="me-btn" id="me-btn" aria-label="Profil"></button></div>
+    <h1><button class="brand" id="brand" aria-label="Zur Startseite"><span class="back" aria-hidden="true">‹</span>Spieleabend</button></h1>
+    <div class="top-right"><span class="sync" id="sync" role="status"></span><button class="hbtn" id="extras-btn" aria-label="Extras öffnen">⚄ Extras</button><button class="me-btn" id="me-btn" aria-label="Profil"></button></div>
   </header>
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="kniffel" id="tab-kniffel">Kniffel</button>
-    <button role="tab" data-tab="wizard" id="tab-wizard">Wizard</button>
-    <button role="tab" data-tab="flip7" id="tab-flip7">Flip 7</button>
-    <button role="tab" data-tab="padel" id="tab-padel">Padel</button>
-    <button role="tab" data-tab="board" id="tab-board">Bestenliste</button>
-  </nav>
+  <div class="view-title" id="view-title" hidden></div>
   <div id="livebar" hidden></div>
   <main id="app"></main>
 </div>
@@ -575,8 +636,9 @@ function freshPadel(){ return {teams:['Anna & Ben','Chris & Dana'], sets:[[0,0]]
 let S;
 try { S = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) { S = null; }
 if (!S || !S.players) {
-  S = { tab:'kniffel', players:[...defaultPlayers], kniffel:null, wizard:null, padel:null };
+  S = { tab:'home', players:[...defaultPlayers], kniffel:null, wizard:null, padel:null };
 }
+S.tab = 'home';
 if (!S.kniffel) S.kniffel = exampleKniffel(S.players);
 if (!S.wizard) S.wizard = freshWizard(S.players);
 if (!S.padel) S.padel = freshPadel();
@@ -615,9 +677,11 @@ rebuildHistory();
 function setSync(){
   const el = $('#sync'); if (!el) return;
   const n = pending.length;
-  el.textContent = !pin ? (n ? `PIN fehlt · ${n} wartet` : 'PIN fehlt')
+  const t = !pin ? (n ? `PIN fehlt · ${n} wartet` : 'PIN fehlt')
     : online === false ? (n ? `offline · ${n} wartet` : 'offline')
     : n ? `${n} wird gesendet…` : online ? 'synchronisiert' : 'verbinde…';
+  el.title = t; el.setAttribute('aria-label', 'Status: ' + t); el.textContent = '';
+  el.dataset.s = !pin ? 'nopin' : online === false ? 'off' : n ? 'wait' : online ? 'ok' : 'wait';
 }
 
 async function sb(path, opts = {}){
@@ -776,7 +840,7 @@ function renderKniffel(){
     </select></td>`;
   };
   const head = `<tr><th>Kniffel</th>${ps.map(p => `<th>${esc(p)}</th>`).join('')}</tr>`;
-  const upper = UPPER.map(([n,v],i) => `<tr><td class="cat">${n}<span>nur ${v}er zählen</span></td>${ps.map(p => cell(p,'u'+(i+1))).join('')}</tr>`).join('');
+  const upper = UPPER.map(([n,v],i) => `<tr><td class="cat">${n}</td>${ps.map(p => cell(p,'u'+(i+1))).join('')}</tr>`).join('');
   const upSum = `<tr class="sum"><td>Summe oben</td>${totals.map(t => `<td>${t.up}</td>`).join('')}</tr>`;
   const bonus = `<tr class="sum"><td>Bonus ab 63</td>${totals.map(t => `<td>${t.bonus ? '+35' : `<span class="bonus-hint">noch ${Math.max(0,63 - t.up)}</span>`}</td>`).join('')}</tr>`;
   const lower = LOWER.map(l => `<tr><td class="cat">${l.n}<span>${l.h}</span></td>${ps.map(p => cell(p,l.k)).join('')}</tr>`).join('');
@@ -784,7 +848,7 @@ function renderKniffel(){
   const total = `<tr class="total"><td>Gesamt</td>${totals.map((t,i) => `<td>${leadIdx.includes(i) ? `<span class="lead">${t.total}</span>` : t.total}</td>`).join('')}</tr>`;
 
   return `<div class="stack">
-    ${K.example ? `<div class="note"><b>Beispielrunde.</b> Die Werte sind nur zum Zeigen, wie der Block aussieht. „Neues Spiel“ leert ihn, „Spieler ändern“ setzt eure Namen.</div>` : ''}
+    ${K.example ? `<div class="note"><b>Beispiel.</b> „Neues Spiel“ leert den Block.</div>` : ''}
     ${playersBlock('kniffel')}
     <div class="sheet"><table><thead>${head}</thead><tbody>${upper}${upSum}${bonus}<tr class="gap"><td colspan="${ps.length+1}"></td></tr>${lower}${lowSum}${total}</tbody></table></div>
     <div class="row between">
@@ -881,13 +945,13 @@ function renderWizard(){
         const run = {}; ps.forEach(p => run[p] = 0);
         for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += wRoundScore(W.rounds[j], p));
         return `<tr class="clickable ${W.cur === i ? 'current' : ''}" data-act="w-edit" data-i="${i}" title="Runde ${i+1} bearbeiten">
-          <td class="cat">Runde ${i+1}<span>antippen zum Korrigieren</span></td>
+          <td class="cat">Runde ${i+1}</td>
           ${ps.map(p => { const s = wRoundScore(r, p); const c = r.cloud && r.cloud.p === p;
             return `<td class="wz">${run[p]}<small class="${s < 0 ? 'neg' : ''}">${s > 0 ? '+' : ''}${s} · ${c ? '☁' + wBid(r,p) : r.bids[p]}/${r.tricks[p]}</small></td>`; }).join('')}
         </tr>`; }).join('')}
       <tr class="total"><td>Stand</td>${ps.map(p => `<td>${totals[p] === max ? `<span class="lead">${totals[p]}</span>` : totals[p]}</td>`).join('')}</tr>
       </tbody></table></div>
-      <span class="label">Klein: Rundenpunkte · Ansage/Stiche (☁ = durch Wolke geänderte Ansage). Richtig: 20 + 10 je Stich. Daneben: −10 je Stich Abweichung.</span>`;
+`;
   }
 
   return `<div class="stack">
@@ -980,7 +1044,7 @@ function renderPadel(){
         <button class="btn ghost" data-act="p-new">Neues Match</button>
       </div>
     </div>
-    <span class="label">Best of 3 · Tiebreak bei 6:6 · Namen mit „&“ trennen, dann zählt der Sieg für beide in der Bestenliste</span>
+    <span class="label">Namen mit „&“ trennen</span>
   </div>`;
 }
 
@@ -1040,7 +1104,7 @@ function renderFlip(){
         const run = {}; ps.forEach(p => run[p] = 0);
         for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += f7Score(F.rounds[j][p]));
         return `<tr class="clickable ${F.cur === i ? 'current' : ''}" data-act="f7-edit" data-i="${i}">
-          <td class="cat">Runde ${i+1}<span>antippen zum Korrigieren</span></td>
+          <td class="cat">Runde ${i+1}</td>
           ${ps.map(p => { const e = r[p]; const sc = f7Score(e);
             const tag = e && e.bust ? '<small class="neg">raus</small>' : e && e.nums.length >= 7 ? '<small>Flip 7!</small>' : `<small>+${sc}</small>`;
             return `<td class="wz">${run[p]}${tag}</td>`; }).join('')}
@@ -1054,7 +1118,7 @@ function renderFlip(){
     ${!finished ? `<div class="f7-round">
       <div class="row between">
         <div><div class="label">${editing ? 'Runde korrigieren' : 'Aktuelle Runde'}</div><div class="f7-big">Runde ${F.cur + 1}</div></div>
-        <div class="label" style="text-align:right;max-width:24ch">Antippen, was jeder am Rundenende vor sich liegen hat · Ziel ${F.target}</div>
+        <div class="label" style="text-align:right">Ziel ${F.target}</div>
       </div>
       ${anyFlip7 ? `<div class="f7-flag big">Flip 7! Die Runde endet, alle anderen sichern ihre Karten.</div>` : ''}
       <div class="f7-list">${ps.map(card).join('')}</div>
@@ -1067,7 +1131,7 @@ function renderFlip(){
     ${F.saved ? winnerCard('flip7', F.saved) : ''}
     ${table}
     <div class="row between">
-      <span class="label">Zahlen addieren · ×2 verdoppelt nur die Zahlen · dann Plus-Karten · 7 verschiedene Zahlen = +15 · raus = 0</span>
+      <span></span>
       <div class="row">
         <button class="btn ghost" data-act="f7-new">Neues Spiel</button>
         ${!finished && F.rounds.length && !F.saved ? `<button class="btn" data-act="f7-finish">Vorzeitig beenden</button>` : ''}
@@ -1134,33 +1198,92 @@ function renderBoard(){
     ${renderRecordsBlock(list)}
     ${renderRivalsBlock(list)}
     ${renderAccountsBlock()}
-    ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele · antippen für Details</div><div class="log">
+    ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele</div><div class="log">
       ${list.slice(0,30).map(g => `<div class="log-item">
         <span class="type">${TYPE_LABEL[g.type] || g.type}</span>
         <span class="res clickable-res" data-act="game-detail" data-id="${esc(g.id)}" role="button" tabindex="0"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}</span></span>
         <button class="x" data-act="del-game" data-id="${esc(g.id)}" aria-label="Spiel löschen" title="Spiel löschen">×</button>
       </div>`).join('')}
     </div></div>` : ''}
-    <span class="label">Rote Laterne = am häufigsten Letzter. Bei Padel zählt jedes Teammitglied einzeln.</span>
     ${pin ? `<div class="row"><button class="btn ghost small" data-act="pin-reset">PIN auf diesem Gerät vergessen</button></div>` : ''}
+  </div>`;
+}
+
+
+/* ---------- Startseite ---------- */
+function gameStatus(t){
+  if (t === 'kniffel') {
+    const K = S.kniffel; if (K.example) return 'Neues Spiel';
+    if (K.saved) return 'Fertig · ' + esc(K.saved.winners.join(' & '));
+    const f = S.players.reduce((n,p) => n + kTotals(K.scores[p]).filled, 0);
+    return f ? `läuft · ${f}/${ALL_K.length * S.players.length} Felder` : 'Neues Spiel';
+  }
+  if (t === 'wizard') {
+    const W = S.wizard; if (W.saved) return 'Fertig · ' + esc(W.saved.winners.join(' & '));
+    const n = W.players.length, max = n >= 3 && n <= 6 ? 60 / n : 0;
+    return W.rounds.length ? `läuft · Runde ${Math.min(W.rounds.length + 1, max)}/${max}` : 'Neues Spiel';
+  }
+  if (t === 'flip7') {
+    const F = S.flip7; if (F.saved) return 'Fertig · ' + esc(F.saved.winners.join(' & '));
+    if (!F.rounds.length) return 'Neues Spiel';
+    const tot = f7Totals(F), lead = F.players.reduce((a,b) => tot[b] > tot[a] ? b : a, F.players[0]);
+    return `läuft · ${esc(lead)} ${tot[lead]}`;
+  }
+  if (t === 'padel') {
+    const P = S.padel; if (P.saved) return 'Fertig · ' + esc(P.saved.winners.join(' & '));
+    const any = P.pts[0] + P.pts[1] > 0 || P.sets.some(x => x[0] + x[1] > 0);
+    return any ? 'läuft · ' + P.sets.map(x => x.join(':')).join(' ') : 'Neues Match';
+  }
+  return '';
+}
+function renderHome(){
+  const card = (t, name, art) => {
+    const st = gameStatus(t), live = st.startsWith('läuft');
+    return `<button class="mode mode-${t}" data-act="go" data-t="${t}">
+      <span class="mode-art" aria-hidden="true">${art}</span>
+      <span class="mode-name">${name}</span>
+      <span class="mode-state ${live ? 'live' : ''}">${st}</span>
+    </button>`;
+  };
+  const rows = boardRows(history);
+  const top = rows[0];
+  return `<div class="home">
+    <div class="modes">
+      ${card('kniffel', 'Kniffel', '<i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i>')}
+      ${card('wizard', 'Wizard', '✦')}
+      ${card('flip7', 'Flip 7', '7')}
+      ${card('padel', 'Padel', '<i class="ball"></i>')}
+    </div>
+    <button class="mode-wide" data-act="go" data-t="board">
+      <span><b>Bestenliste</b><small>${top ? `Vorne: ${esc(top.name)} · ${top.wins} ${top.wins === 1 ? 'Sieg' : 'Siege'}` : 'Noch keine Spiele'}</small></span>
+      <span class="arrow" aria-hidden="true">›</span>
+    </button>
+    <div class="quick">
+      <button data-act="tool" data-k="starter">Wer fängt an?</button>
+      <button data-act="tool" data-k="dice">Würfeln</button>
+      <button data-act="tool" data-k="coin">Münze</button>
+      <button data-act="tool" data-k="teams">Teams</button>
+      <button data-act="tool" data-k="wheel">Spielrad</button>
+    </div>
   </div>`;
 }
 
 /* ---------- Render & Events ---------- */
 function render(){
-  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === S.tab));
   document.documentElement.dataset.game = S.tab;
+  document.body.dataset.view = S.tab === 'home' ? 'home' : 'page';
   const tc = {kniffel:'#f5f6f0', wizard:'#0d1130', padel:'#0f3d73', flip7:'#ffcf33'}[S.tab];
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', tc || (m.media.includes('dark') ? '#111110' : '#fbfbf8')));
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', '#151514'));
   const app = $('#app');
   if (typeof updateWake === 'function') updateWake();
-  app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : S.tab === 'flip7' ? renderFlip() : renderBoard();
+  app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : S.tab === 'flip7' ? renderFlip() : S.tab === 'board' ? renderBoard() : renderHome();
 }
 
-document.querySelector('nav.tabs').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  S.tab = b.dataset.tab; editingPlayers = false; playerMsg = ''; save(); render();
-});
+function goTo(tab){
+  S.tab = tab; editingPlayers = false; playerMsg = ''; save(); render();
+  window.scrollTo({top:0});
+}
+document.getElementById('brand').addEventListener('click', () => goTo('home'));
 
 function applyPlayers(){
   const ps = S.players;
@@ -1262,6 +1385,8 @@ app.addEventListener('click', async e => {
     P.saved = res; save(); render(); await recordGame({...res, detail:{teams:[...P.teams], sets:JSON.parse(JSON.stringify(P.sets)), winner:P.done}}); return;
   }
 
+  if (a === 'go') { goTo(el.dataset.t); return; }
+  if (a === 'tool') { openSheet({kind: el.dataset.k}); return; }
   if (a === 'filter') { boardFilter = el.dataset.f; render(); return; }
   if (a === 'profile') { openSheet({kind:'profile', name: el.dataset.name}); return; }
   if (a === 'account') { openSheet({kind:'account'}); return; }
@@ -2034,7 +2159,7 @@ sheetEl.addEventListener('click', e => {
     const tick = () => { v.hi = opts[i % opts.length]; renderSheet(); if (i++ < total) setTimeout(tick, 40 + Math.pow(i / total, 3) * 380); else { v.done = true; v.spinning = false; renderSheet(); } };
     tick(); return;
   }
-  if (x === 'wheel-go') { S.tab = el.dataset.t; save(); closeSheet(); render(); return; }
+  if (x === 'wheel-go') { closeSheet(); goTo(el.dataset.t); return; }
   if (x === 'profile') return openSheet({kind:'profile', name: el.dataset.name});
   if (x === 'account') return openSheet({kind:'account'});
   if (x === 'account-register') return openSheet({kind:'account', mode:'register', name: el.dataset.name});
