@@ -16,7 +16,7 @@
 <title>Spieleabend Zählblock</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Caveat:wght@600;700&family=Cinzel:wght@600;700;900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
 <style>
 :root{
   --paper:#fbfbf8; --card:#ffffff; --ink:#151514; --muted:#6c6c66; --rule:#dcdcd5; --rule-strong:#151514;
@@ -99,17 +99,25 @@ td select option{color:#151514;background:#fff}
 .round-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:6px}
 .round-head .big{font-family:var(--display);font-weight:900;font-size:40px;line-height:.85}
 .round-head .big small{font-size:20px;color:var(--muted);font-weight:700}
-.wz-grid{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:center}
+.wz-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;align-items:center}
 .wz-grid .h{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
 .wz-grid .h:first-child{text-align:left}
-.wz-name{font-weight:600;padding-block:6px;display:flex;align-items:center;gap:8px;min-width:0}
-.wz-name .dealer{font-family:var(--mono);font-size:10px;border:1px solid var(--rule);border-radius:3px;padding:1px 4px;color:var(--muted);font-weight:400}
+.wz-name{font-weight:600;padding-block:6px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;overflow-wrap:anywhere}
+.wz-name .dealer{white-space:nowrap;font-family:var(--mono);font-size:10px;border:1px solid var(--rule);border-radius:3px;padding:1px 4px;color:var(--muted);font-weight:400}
 .step{display:flex;align-items:center;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
 .step button{width:36px;height:36px;border:0;background:var(--soft);font-size:18px;font-weight:600}
 .step output{width:34px;text-align:center;font-family:var(--mono);font-weight:700;font-size:17px}
 .step.unset output{color:var(--muted);font-weight:400}
 .checks{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px;display:flex;flex-direction:column;gap:3px}
-.checks .bad{color:var(--mark)}
+.checks .bad,.cloud .bad{color:var(--mark)}
+.cloud{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--rule);font-size:13.5px}
+.cloud label{font-weight:600}
+.cloud select{border:1px solid var(--rule);background:var(--card);border-radius:4px;padding:6px 8px}
+.cloud .bad{font-family:var(--mono);font-size:12px}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:6px 10px;font-size:13px;font-weight:600}
+.seg button+button{border-left:1px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .pts{font-family:var(--mono);font-size:11px}
 .neg{color:var(--mark)}
 td.wz small{display:block;font-size:10px;color:var(--muted);font-family:var(--mono);line-height:1}
@@ -174,6 +182,100 @@ tr.current td{outline:1.5px solid var(--ink);outline-offset:-2px}
 .pinbox b{display:block}
 .pinbox span{display:block;font-size:13px;color:var(--muted);max-width:40ch}
 .pinbox input{border:1px solid var(--rule);background:var(--paper);border-radius:4px;padding:7px 10px;width:110px;font-family:var(--mono)}
+
+/* ================= Spiel-Themes ================= */
+html,body{transition:background-color .3s ease}
+/* Kniffel: Würfelblock mit Kuli */
+:root:root[data-game="kniffel"]{
+  --paper:#f5f6f0; --card:#fffffc; --ink:#1b2847; --muted:#65708c; --rule:#c6d1e6; --rule-strong:#1b2847;
+  --mark:#d2362b; --soft:#eef2f9; --focus:#1b2847; --pen:#1d4fbf;
+  --hand:"Caveat", "Bradley Hand", "Segoe Print", cursive;
+}
+:root[data-game="kniffel"] body{
+  background-color:var(--paper);
+  background-image:linear-gradient(90deg, transparent 0 calc(50% - 392px), rgba(210,54,43,.35) calc(50% - 392px) calc(50% - 390px), transparent calc(50% - 390px)),
+    repeating-linear-gradient(0deg, rgba(29,79,191,.07) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, rgba(29,79,191,.07) 0 1px, transparent 1px 24px);
+}
+:root[data-game="kniffel"] td select{font-family:var(--hand);font-size:24px;font-weight:700;color:var(--pen);line-height:1}
+:root[data-game="kniffel"] td select.empty{color:var(--rule);font-size:20px}
+:root[data-game="kniffel"] tr.sum td:not(:first-child),
+:root[data-game="kniffel"] tr.total td:not(:first-child){font-family:var(--hand);color:var(--pen);font-size:24px}
+:root[data-game="kniffel"] tr.total td:not(:first-child){font-size:30px}
+:root[data-game="kniffel"] .lead::after{border-width:2.5px}
+:root[data-game="kniffel"] .sheet{box-shadow:3px 3px 0 var(--rule)}
+:root[data-game="kniffel"] thead th{background:var(--ink);color:var(--card)}
+:root[data-game="kniffel"] thead th:first-child{background:var(--ink);color:var(--card)}
+:root[data-game="kniffel"] h1::before{content:"⚄ ";font-weight:400}
+
+/* Wizard: Sternennacht und Gold */
+:root:root[data-game="wizard"]{
+  --paper:#0d1130; --card:#151a44; --ink:#f3ead3; --muted:#a8a3c8; --rule:#2c3470; --rule-strong:#d8b45f;
+  --mark:#ff7d6c; --soft:#1c2256; --focus:#d8b45f; --gold:#d8b45f;
+  --display:"Cinzel", "Trajan Pro", Georgia, serif;
+}
+:root[data-game="wizard"] body{
+  background-color:var(--paper);
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 18%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 9%, #fff9 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 38% 42%, #fff6 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 36%, #fff8 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 22% 71%, #fff7 50%, transparent 51%),
+    radial-gradient(1px 1px at 63% 64%, #fff6 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 91% 83%, #d8b45f99 50%, transparent 51%),
+    radial-gradient(1px 1px at 47% 92%, #fff7 50%, transparent 51%),
+    radial-gradient(ellipse at 50% -10%, #2a2f78 0%, transparent 60%);
+  background-size:260px 260px,260px 260px,260px 260px,260px 260px,260px 260px,260px 260px,260px 260px,260px 260px,100% 100%;
+  background-attachment:fixed;
+}
+:root[data-game="wizard"] h1, :root[data-game="wizard"] h2, :root[data-game="wizard"] nav.tabs button{letter-spacing:.06em}
+:root[data-game="wizard"] h1{font-weight:900;color:var(--gold)}
+:root[data-game="wizard"] nav.tabs button{font-size:16px;font-weight:700}
+:root[data-game="wizard"] nav.tabs{background:var(--paper)}
+:root[data-game="wizard"] nav.tabs button[aria-selected="true"]{color:var(--gold);border-bottom-color:var(--gold)}
+:root[data-game="wizard"] .round{border-color:var(--gold);box-shadow:0 0 0 4px var(--card), 0 0 0 5px #d8b45f55, 0 10px 40px #0008;border-radius:10px}
+:root[data-game="wizard"] .round-head .big{color:var(--gold);font-weight:900}
+:root[data-game="wizard"] .step{border-color:var(--rule)}
+:root[data-game="wizard"] .btn.solid{background:var(--gold);color:#1a1433;border-color:var(--gold)}
+:root[data-game="wizard"] .lead::after{border-color:var(--gold)}
+:root[data-game="wizard"] thead th{color:var(--gold);font-size:14px}
+:root[data-game="wizard"] tr.total td:first-child{font-size:15px}
+:root[data-game="wizard"] .sheet{border-radius:6px}
+:root[data-game="wizard"] h1::before{content:"✦ ";font-weight:400}
+
+/* Padel: Court und Anzeigetafel */
+:root:root[data-game="padel"]{
+  --paper:#0f3d73; --card:#13497f; --ink:#ffffff; --muted:#b7cbe6; --rule:#4d78a9; --rule-strong:#ffffff;
+  --mark:#e4f34c; --soft:#0c3462; --focus:#e4f34c; --ball:#e4f34c; --board:#07182c;
+}
+:root[data-game="padel"] body{
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(90deg, transparent calc(50% - 1px), #ffffff2e calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(0deg, transparent 0 62%, #ffffff2e 62% calc(62% + 2px), transparent calc(62% + 2px)),
+    radial-gradient(ellipse at 50% 0%, #1b5a9c 0%, transparent 70%);
+  background-attachment:fixed;
+}
+:root[data-game="padel"] .court{border:2px solid #fff;border-radius:6px;background:var(--board)}
+:root[data-game="padel"] .court-head{border-bottom-color:#ffffff26}
+:root[data-game="padel"] .team-row{border-bottom-color:#ffffff26}
+:root[data-game="padel"] .team-row input{color:#fff}
+:root[data-game="padel"] .team-row .set{color:#8fa6c4}
+:root[data-game="padel"] .team-row .set.won{color:#fff}
+:root[data-game="padel"] .team-row .game{background:#000;color:var(--ball);font-family:var(--mono);font-weight:700;font-size:34px;text-shadow:0 0 12px #e4f34c88;border-left:2px solid #ffffff26}
+:root[data-game="padel"] .team-row .game.adv{font-size:13px;letter-spacing:0}
+:root[data-game="padel"] .team-row.serve input{text-decoration:none}
+.team-row.serve input{text-decoration:none!important;background:radial-gradient(circle at 10px 50%, var(--mark) 0 5px, transparent 6px) no-repeat;padding-left:24px}
+:root[data-game="padel"] .team-row.serve input{background:radial-gradient(circle at 10px 50%, var(--ball) 0 5px, transparent 6px) no-repeat;padding-left:24px}
+:root[data-game="padel"] .point-btns button{border:2px solid #fff;background:#ffffff14;color:#fff;border-radius:8px}
+:root[data-game="padel"] .point-btns button:active{background:var(--ball);color:#0b2440;border-color:var(--ball)}
+:root[data-game="padel"] .status{color:var(--ball)}
+:root[data-game="padel"] .btn.solid{background:var(--ball);color:#0b2440;border-color:var(--ball)}
+:root[data-game="padel"] .toggle input{accent-color:var(--ball)}
+:root[data-game="padel"] .winner{border-color:var(--ball)}
+:root[data-game="padel"] h1::before{content:"● ";color:var(--ball);font-weight:400}
+@media (prefers-reduced-motion:reduce){html,body{transition:none}}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   nav.tabs button{font-size:16px}
@@ -461,9 +563,12 @@ function renderKniffel(){
 
 /* ---------- Wizard ---------- */
 function wScore(bid, tricks){ return bid === tricks ? 20 + 10*tricks : -10*Math.abs(bid - tricks); }
+// Wolke (Jubiläumsausgabe): wer den Wolken-Stich gewinnt, ändert seine Ansage um +1 oder −1
+function wBid(r, p){ return r.bids[p] + (r.cloud && r.cloud.p === p ? (r.cloud.d || 0) : 0); }
+function wRoundScore(r, p){ return wScore(wBid(r, p), r.tricks[p]); }
 function wTotals(W){
   const t = {}; W.players.forEach(p => t[p] = 0);
-  W.rounds.forEach(r => W.players.forEach(p => t[p] += wScore(r.bids[p], r.tricks[p])));
+  W.rounds.forEach(r => W.players.forEach(p => t[p] += wRoundScore(r, p)));
   return t;
 }
 function renderWizard(){
@@ -485,7 +590,9 @@ function renderWizard(){
     const trickSum = ps.reduce((s,p) => s + (d.tricks[p] ?? 0), 0);
     const allBids = ps.every(p => d.bids[p] !== undefined);
     const allTricks = ps.every(p => d.tricks[p] !== undefined);
-    const ok = allBids && allTricks && trickSum === roundNo;
+    const cl = d.cloud || null;
+    const cloudOk = !cl || (cl.d === 1 || cl.d === -1) && d.bids[cl.p] !== undefined && d.bids[cl.p] + cl.d >= 0;
+    const ok = allBids && allTricks && trickSum === roundNo && cloudOk;
     const stepper = (kind, p) => {
       const v = d[kind][p];
       return `<div class="step ${v === undefined ? 'unset' : ''}">
@@ -501,11 +608,24 @@ function renderWizard(){
       </div>
       <div class="wz-grid">
         <div class="h">Spieler</div><div class="h">Ansage</div><div class="h">Stiche</div>
-        ${ps.map(p => `<div class="wz-name">${esc(p)}${p === dealer ? '<span class="dealer">gibt</span>' : ''}</div>${stepper('bids',p)}${stepper('tricks',p)}`).join('')}
+        ${ps.map(p => `<div class="wz-name">${esc(p)}${p === dealer ? '<span class="dealer">gibt</span>' : ''}${cl && cl.p === p && cl.d ? `<span class="dealer" style="color:var(--ink);border-color:var(--ink)">☁ ${d.bids[p] ?? '?'}→${(d.bids[p] ?? 0) + cl.d}</span>` : ''}</div>${stepper('bids',p)}${stepper('tricks',p)}`).join('')}
       </div>
       <div class="checks">
         <span>Ansagen: ${allBids ? bidSum : '…'} bei ${roundNo} Stichen ${allBids ? (bidSum === roundNo ? '· geht exakt auf' : bidSum > roundNo ? `· ${bidSum - roundNo} zu viel angesagt` : `· ${roundNo - bidSum} zu wenig angesagt`) : ''}</span>
         <span class="${allTricks && trickSum !== roundNo ? 'bad' : ''}">Stiche: ${trickSum} von ${roundNo}${allTricks && trickSum !== roundNo ? ' · passt nicht' : ''}</span>
+      </div>
+      <div class="cloud">
+        <label for="w-cloud">☁ Wolke gewonnen von</label>
+        <select id="w-cloud" data-cloud-p>
+          <option value="">niemand</option>
+          ${ps.map(p => `<option value="${esc(p)}" ${cl && cl.p === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}
+        </select>
+        ${cl ? `<div class="seg" role="group" aria-label="Ansage ändern">
+          <button data-act="w-cloud-d" data-d="-1" aria-pressed="${cl.d === -1}">Ansage −1</button>
+          <button data-act="w-cloud-d" data-d="1" aria-pressed="${cl.d === 1}">Ansage +1</button>
+        </div>` : ''}
+        ${cl && !cl.d ? `<span class="bad">+1 oder −1 wählen</span>` : ''}
+        ${cl && cl.d === -1 && d.bids[cl.p] === 0 ? `<span class="bad">Ansage 0 kann nicht sinken</span>` : ''}
       </div>
       <div class="row between" style="margin-top:12px">
         ${editing ? `<button class="btn ghost small" data-act="w-back">Abbrechen</button>` : `<span></span>`}
@@ -522,15 +642,15 @@ function renderWizard(){
       <tbody>
       ${W.rounds.map((r,i) => {
         const run = {}; ps.forEach(p => run[p] = 0);
-        for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += wScore(W.rounds[j].bids[p], W.rounds[j].tricks[p]));
+        for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += wRoundScore(W.rounds[j], p));
         return `<tr class="clickable ${W.cur === i ? 'current' : ''}" data-act="w-edit" data-i="${i}" title="Runde ${i+1} bearbeiten">
           <td class="cat">Runde ${i+1}<span>antippen zum Korrigieren</span></td>
-          ${ps.map(p => { const s = wScore(r.bids[p], r.tricks[p]);
-            return `<td class="wz">${run[p]}<small class="${s < 0 ? 'neg' : ''}">${s > 0 ? '+' : ''}${s} · ${r.bids[p]}/${r.tricks[p]}</small></td>`; }).join('')}
+          ${ps.map(p => { const s = wRoundScore(r, p); const c = r.cloud && r.cloud.p === p;
+            return `<td class="wz">${run[p]}<small class="${s < 0 ? 'neg' : ''}">${s > 0 ? '+' : ''}${s} · ${c ? '☁' + wBid(r,p) : r.bids[p]}/${r.tricks[p]}</small></td>`; }).join('')}
         </tr>`; }).join('')}
       <tr class="total"><td>Stand</td>${ps.map(p => `<td>${totals[p] === max ? `<span class="lead">${totals[p]}</span>` : totals[p]}</td>`).join('')}</tr>
       </tbody></table></div>
-      <span class="label">Klein: Rundenpunkte · Ansage/Stiche. Richtig: 20 + 10 je Stich. Daneben: −10 je Stich Abweichung.</span>`;
+      <span class="label">Klein: Rundenpunkte · Ansage/Stiche (☁ = durch Wolke geänderte Ansage). Richtig: 20 + 10 je Stich. Daneben: −10 je Stich Abweichung.</span>`;
   }
 
   return `<div class="stack">
@@ -606,7 +726,7 @@ function renderPadel(){
     : `<div class="status">${D.info || `Satz ${P.sets.length} · ${w[0]}:${w[1]} Sätze`}</div>`;
   return `<div class="stack">
     <div class="court">
-      <div class="court-head"><span>Team · unterstrichen schlägt auf</span><span>S1</span><span>S2</span><span>S3</span><span>Spiel</span></div>
+      <div class="court-head"><span>Team · ● schlägt auf</span><span>S1</span><span>S2</span><span>S3</span><span>Spiel</span></div>
       ${teamRow(0)}${teamRow(1)}
     </div>
     ${status}
@@ -691,6 +811,9 @@ function renderBoard(){
 /* ---------- Render & Events ---------- */
 function render(){
   document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === S.tab));
+  document.documentElement.dataset.game = S.tab;
+  const tc = {kniffel:'#f5f6f0', wizard:'#0d1130', padel:'#0f3d73'}[S.tab];
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', tc || (m.media.includes('dark') ? '#111110' : '#fbfbf8')));
   const app = $('#app');
   app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : renderBoard();
 }
@@ -734,15 +857,16 @@ app.addEventListener('click', async e => {
     W.draft[kind][p] = nv; save(); render(); return;
   }
   if (a === 'w-score') {
-    const r = {bids:{...W.draft.bids}, tricks:{...W.draft.tricks}};
+    const r = {bids:{...W.draft.bids}, tricks:{...W.draft.tricks}, cloud: W.draft.cloud ? {...W.draft.cloud} : null};
     if (W.cur < W.rounds.length) W.rounds[W.cur] = r; else W.rounds.push(r);
     W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; W.saved = false; save(); render(); return;
   }
   if (a === 'w-edit') {
     const i = +el.dataset.i; W.cur = i;
-    W.draft = {bids:{...W.rounds[i].bids}, tricks:{...W.rounds[i].tricks}}; save(); render();
+    W.draft = {bids:{...W.rounds[i].bids}, tricks:{...W.rounds[i].tricks}, cloud: W.rounds[i].cloud ? {...W.rounds[i].cloud} : null}; save(); render();
     $('.round')?.scrollIntoView({behavior:'smooth', block:'start'}); return;
   }
+  if (a === 'w-cloud-d') { if (W.draft.cloud) { W.draft.cloud.d = +el.dataset.d; save(); render(); } return; }
   if (a === 'w-back') { W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; save(); render(); return; }
   if (a === 'w-new') { S.wizard = freshWizard(S.players); save(); render(); return; }
   if (a === 'w-finish') {
@@ -782,6 +906,11 @@ app.addEventListener('change', e => {
     S.kniffel.scores[p] = S.kniffel.scores[p] || {};
     if (t.value === '') delete S.kniffel.scores[p][k]; else S.kniffel.scores[p][k] = +t.value;
     S.kniffel.saved = false; save(); render(); return;
+  }
+  if (t.matches('[data-cloud-p]')) {
+    const W = S.wizard;
+    W.draft.cloud = t.value ? {p: t.value, d: W.draft.cloud && W.draft.cloud.d || 0} : null;
+    save(); render(); return;
   }
   if (t.id === 'golden') { S.padel.golden = t.checked; save(); render(); return; }
 });
