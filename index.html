@@ -547,20 +547,27 @@ function confetti(){
 }
 
 /* ---------- Spieler-Editor ---------- */
+// Flip 7 hat eine eigene Spielerliste ohne Obergrenze, alle anderen Spiele teilen sich eine Liste mit max. 8
+const MAX_PLAYERS = 8;
+let playerMsg = '';
+function roster(){ return S.tab === 'flip7' ? S.flip7.players : S.players; }
+function rosterLimit(){ return S.tab === 'flip7' ? Infinity : MAX_PLAYERS; }
 function playersBlock(context){
+  const list = roster();
   if (!editingPlayers) {
     return `<div class="row between">
-      <div class="players">${S.players.map(p => `<span class="chip" style="padding-right:12px">${esc(p)}</span>`).join('')}</div>
+      <div class="players">${list.map(p => `<span class="chip" style="padding-right:12px">${esc(p)}</span>`).join('')}${context === 'flip7' ? `<span class="label">${list.length} Spieler</span>` : ''}</div>
       <button class="btn ghost small" data-act="edit-players">Spieler ändern</button>
     </div>`;
   }
   return `<div class="stack" style="gap:8px">
     <div class="players">
-      ${S.players.map((p,i) => `<span class="chip">${esc(p)}<button aria-label="${esc(p)} entfernen" data-act="rm-player" data-i="${i}">×</button></span>`).join('')}
-      <form class="add" data-form="add-player"><input id="new-player" placeholder="Name" maxlength="18" autocomplete="off"><button class="btn small">Hinzufügen</button></form>
+      ${list.map((p,i) => `<span class="chip">${esc(p)}<button aria-label="${esc(p)} entfernen" data-act="rm-player" data-i="${i}">×</button></span>`).join('')}
+      ${list.length < rosterLimit() ? `<form class="add" data-form="add-player"><input id="new-player" placeholder="Name" maxlength="18" autocomplete="off"><button class="btn small">Hinzufügen</button></form>` : ''}
     </div>
+    ${playerMsg ? `<div class="label" style="color:var(--mark)">${esc(playerMsg)}</div>` : ''}
     <div class="row between">
-      <span class="label">${context === 'wizard' ? 'Wizard: 3–6 Spieler · Änderung startet neue Partie' : context === 'flip7' ? 'Änderung startet neue Flip-7-Partie' : 'Neue Spieler bekommen eine leere Spalte'}</span>
+      <span class="label">${context === 'wizard' ? 'Wizard: 3–6 Spieler · Änderung startet neue Partie' : context === 'flip7' ? `Flip 7: beliebig viele Spieler (${list.length}) · Neue steigen mit 0 Punkten ein, laufende Partie bleibt` : `Neue Spieler bekommen eine leere Spalte · max. ${MAX_PLAYERS}`}</span>
       <button class="btn solid small" data-act="done-players">Fertig</button>
     </div>
   </div>`;
@@ -970,7 +977,7 @@ function render(){
 
 document.querySelector('nav.tabs').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  S.tab = b.dataset.tab; editingPlayers = false; save(); render();
+  S.tab = b.dataset.tab; editingPlayers = false; playerMsg = ''; save(); render();
 });
 
 function applyPlayers(){
@@ -981,7 +988,6 @@ function applyPlayers(){
   ps.forEach(p => { S.kniffel.scores[p] = S.kniffel.scores[p] || {}; });
   // Wizard: bei geänderter Besetzung neue Partie
   if (JSON.stringify(S.wizard.players) !== JSON.stringify(ps)) S.wizard = freshWizard(ps);
-  if (JSON.stringify(S.flip7.players) !== JSON.stringify(ps)) S.flip7 = freshFlip(ps);
 }
 
 const app = $('#app');
@@ -989,8 +995,8 @@ app.addEventListener('click', async e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
   const a = el.dataset.act;
   if (a === 'edit-players') { editingPlayers = true; render(); setTimeout(() => $('#new-player')?.focus(), 0); return; }
-  if (a === 'done-players') { editingPlayers = false; applyPlayers(); save(); render(); return; }
-  if (a === 'rm-player') { S.players.splice(+el.dataset.i, 1); save(); render(); return; }
+  if (a === 'done-players') { editingPlayers = false; playerMsg = ''; if (S.tab !== 'flip7') applyPlayers(); save(); render(); return; }
+  if (a === 'rm-player') { roster().splice(+el.dataset.i, 1); playerMsg = ''; save(); render(); return; }
 
   if (a === 'k-new') { S.kniffel = {scores:{}, example:false, saved:false}; S.players.forEach(p => S.kniffel.scores[p] = {}); save(); render(); return; }
   if (a === 'k-finish') {
@@ -1023,7 +1029,7 @@ app.addEventListener('click', async e => {
     }
     if (a === 'f7-edit') { const i = +el.dataset.i; F.cur = i; F.draft = JSON.parse(JSON.stringify(F.rounds[i])); save(); render(); window.scrollTo({top:0, behavior:'smooth'}); return; }
     if (a === 'f7-back') { F.cur = F.rounds.length; F.draft = {}; save(); render(); return; }
-    if (a === 'f7-new') { S.flip7 = freshFlip(S.players); save(); render(); return; }
+    if (a === 'f7-new') { S.flip7 = freshFlip(F.players); save(); render(); return; }
     if (a === 'f7-finish') {
       const t = f7Totals(F);
       const res = buildResult('flip7', F.players.map(pl => ({name:pl, score:t[pl]})));
@@ -1116,8 +1122,11 @@ app.addEventListener('submit', e => {
   if (!e.target.matches('[data-form="add-player"]')) return;
   e.preventDefault();
   const inp = $('#new-player'), name = inp.value.trim();
-  if (name && !S.players.includes(name) && S.players.length < 8) { S.players.push(name); save(); render(); setTimeout(() => $('#new-player')?.focus(), 0); }
-  else inp.select();
+  const list = roster();
+  if (!name) { inp.focus(); return; }
+  if (list.some(n => n.toLowerCase() === name.toLowerCase())) { playerMsg = `„${name}“ ist schon dabei.`; render(); setTimeout(() => { $('#new-player').value = name; $('#new-player')?.select(); }, 0); return; }
+  if (list.length >= rosterLimit()) { playerMsg = `Maximal ${MAX_PLAYERS} Spieler. Nur bei Flip 7 ist die Anzahl frei.`; render(); return; }
+  list.push(name); playerMsg = ''; save(); render(); setTimeout(() => $('#new-player')?.focus(), 0);
 });
 
 render();
