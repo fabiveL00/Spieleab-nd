@@ -462,6 +462,22 @@ body.sheet-open{overflow:hidden}
 .ro tr.clickable{cursor:default}
 .ro td.cat span{display:none}
 
+/* Konto */
+.me-btn{border:1.5px solid var(--ink);background:var(--card);width:38px;height:38px;border-radius:50%;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.me-btn .ava{margin:0;width:100%;height:100%;border:0;background:transparent;font-size:15px}
+.me-btn .ava.emo{font-size:22px}
+.me-btn .me-empty{color:var(--ink)}
+.ava.acc:not(.emo){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.seg.wide{display:grid;grid-template-columns:1fr 1fr;width:100%}
+.seg.wide button{padding:10px}
+.accounts{display:flex;flex-direction:column;border:1.5px solid var(--rule);border-radius:10px;background:var(--card)}
+.acc-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:10px 12px;border:0;border-bottom:1px solid var(--rule);background:none;text-align:left;width:100%}
+.acc-row:last-child{border-bottom:0}
+.acc-row:hover{background:var(--soft)}
+.acc-main{display:flex;flex-direction:column;min-width:0}
+.acc-main small{color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-meta{font-size:11px;color:var(--muted);text-align:right}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -482,7 +498,7 @@ body{margin:0;overscroll-behavior-y:none}
 <div class="wrap">
   <header class="top">
     <h1>Spieleabend<small>Zählblock · Kniffel · Wizard · Flip 7 · Padel</small></h1>
-    <div class="top-right"><span class="sync" id="sync">auf diesem Gerät gespeichert</span><button class="btn ghost small" id="extras-btn" aria-label="Extras öffnen">⚄ Extras</button></div>
+    <div class="top-right"><span class="sync" id="sync">auf diesem Gerät gespeichert</span><button class="btn ghost small" id="extras-btn" aria-label="Extras öffnen">⚄ Extras</button><button class="me-btn" id="me-btn" aria-label="Profil"></button></div>
   </header>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="kniffel" id="tab-kniffel">Kniffel</button>
@@ -1094,6 +1110,7 @@ function renderBoard(){
     ${rows.length ? `<div class="row"><button class="btn small" data-act="export">Bestenliste als Bild teilen</button></div>` : ''}
     ${renderRecordsBlock(list)}
     ${renderRivalsBlock(list)}
+    ${renderAccountsBlock()}
     ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele · antippen für Details</div><div class="log">
       ${list.slice(0,30).map(g => `<div class="log-item">
         <span class="type">${TYPE_LABEL[g.type] || g.type}</span>
@@ -1224,6 +1241,7 @@ app.addEventListener('click', async e => {
 
   if (a === 'filter') { boardFilter = el.dataset.f; render(); return; }
   if (a === 'profile') { openSheet({kind:'profile', name: el.dataset.name}); return; }
+  if (a === 'account') { openSheet({kind:'account'}); return; }
   if (a === 'game-detail') { openSheet({kind:'game', id: el.dataset.id}); return; }
   if (a === 'export') { exportBoard(); return; }
   if (a === 'pin-reset') { pin = ''; store(LS_PIN, ''); pinError = ''; setSync(); render(); return; }
@@ -1347,31 +1365,80 @@ function quipWizardRound(r, players){
   if (misses[0].n >= 2) toastQuip('wizardMiss', misses[0]);
 }
 
-/* ---------- Profile (optional) ---------- */
-const LS_PROFILES = 'spieleabend.profiles.v1';
-let profiles = load(LS_PROFILES, {});
+/* ---------- Konten (optional): Name = Spielername, Passwort ---------- */
+const LS_PROFILES = 'spieleabend.accounts.v1', LS_SESSION = 'spieleabend.session.v1';
+let profiles = load(LS_PROFILES, {});          // key: name klein geschrieben
+let session = load(LS_SESSION, null);          // {token, name}
+const nkey = n => String(n || '').trim().toLowerCase();
+const rpc = (fn, args) => sb('/rest/v1/rpc/' + fn, {method:'POST', body: JSON.stringify(args || {})});
+const errText = e => !e.status ? 'Keine Verbindung.' : e.status === 404 ? 'Konten brauchen noch das Datenbank-Update (SQL).' : (e.message || 'Fehler');
 async function fetchProfiles(){
   try {
-    const rows = await sb('/rest/v1/profiles?select=name,emoji,motto');
-    const map = {}; (rows || []).forEach(r => map[r.name] = {emoji: r.emoji || '', motto: r.motto || ''});
+    const rows = await rpc('list_accounts');
+    const map = {}; (rows || []).forEach(r => map[nkey(r.name)] = {name:r.name, emoji:r.emoji || '', motto:r.motto || '', since:r.since});
     profiles = map; store(LS_PROFILES, profiles);
-  } catch(e) { /* Tabelle fehlt oder offline: Cache nutzen */ }
+    if (session && !profiles[nkey(session.name)]) { session = null; store(LS_SESSION, null); }
+    renderMeBtn();
+  } catch(e) { /* Funktion fehlt oder offline: Cache nutzen */ }
 }
-function profileOf(name){ return profiles[name] || null; }
+function profileOf(name){ return profiles[nkey(name)] || null; }
+function isMe(name){ return !!session && nkey(session.name) === nkey(name); }
 function avatar(name, big){
   const p = profileOf(name);
-  const inner = p && p.emoji ? esc(p.emoji) : esc((name.trim()[0] || '?').toUpperCase());
-  return `<span class="ava ${big ? 'big' : ''} ${p && p.emoji ? 'emo' : ''}" aria-hidden="true">${inner}</span>`;
+  const inner = p && p.emoji ? esc(p.emoji) : esc((String(name).trim()[0] || '?').toUpperCase());
+  return `<span class="ava ${big ? 'big' : ''} ${p && p.emoji ? 'emo' : ''} ${p ? 'acc' : ''}" aria-hidden="true">${inner}</span>`;
+}
+function setSession(s){ session = s; store(LS_SESSION, s); renderMeBtn(); }
+async function accountRegister(name, password, groupPin, emoji, motto){
+  const r = await rpc('register_account', {p_pin: groupPin, p_name: name, p_password: password, p_emoji: emoji || '', p_motto: motto || ''});
+  if (groupPin && !pin) { pin = groupPin; store(LS_PIN, pin); setSync(); }
+  profiles[nkey(r.name)] = {name:r.name, emoji:r.emoji, motto:r.motto, since:new Date().toISOString()}; store(LS_PROFILES, profiles);
+  setSession({token: r.token, name: r.name});
+  return r;
+}
+async function accountLogin(name, password){
+  const r = await rpc('login_account', {p_name: name, p_password: password});
+  profiles[nkey(r.name)] = {...(profiles[nkey(r.name)] || {}), name:r.name, emoji:r.emoji, motto:r.motto}; store(LS_PROFILES, profiles);
+  setSession({token: r.token, name: r.name});
+  return r;
+}
+async function accountLogout(){
+  const t = session && session.token; setSession(null);
+  if (t) { try { await rpc('logout_account', {p_token: t}); } catch(e) {} }
 }
 async function saveProfile(name, emoji, motto){
-  if (!pin) { toast('Zum Speichern von Profilen erst den Gruppen-PIN eingeben.'); return false; }
+  if (!isMe(name)) { toast('Du kannst nur dein eigenes Profil bearbeiten.'); return false; }
   try {
-    await sb('/rest/v1/rpc/set_profile', {method:'POST', body: JSON.stringify({p_pin: pin, p_name: name, p_emoji: emoji, p_motto: motto})});
-    profiles[name] = {emoji, motto}; store(LS_PROFILES, profiles); toast('Profil gespeichert.'); return true;
+    await rpc('update_account', {p_token: session.token, p_emoji: emoji, p_motto: motto});
+    profiles[nkey(name)] = {...(profileOf(name) || {name}), emoji, motto}; store(LS_PROFILES, profiles);
+    renderMeBtn(); toast('Profil gespeichert.'); return true;
   } catch(e) {
-    toast(e.status === 404 ? 'Profile brauchen noch das Datenbank-Update (SQL).' : e.status ? 'Konnte Profil nicht speichern: ' + e.message : 'Keine Verbindung. Profil nicht gespeichert.');
-    return false;
+    if (e.status && /Sitzung/i.test(e.message)) { setSession(null); toast('Bitte neu anmelden.'); return false; }
+    toast('Nicht gespeichert: ' + errText(e)); return false;
   }
+}
+// Profil-Icon oben rechts
+function renderMeBtn(){
+  const b = document.getElementById('me-btn'); if (!b) return;
+  b.innerHTML = session ? avatar(session.name) : '<span class="ava me-empty" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>';
+  b.setAttribute('aria-label', session ? `Mein Profil (${session.name})` : 'Anmelden oder Profil erstellen');
+  b.title = session ? session.name : 'Anmelden';
+}
+async function checkSession(){
+  if (!session) return;
+  try { const me = await rpc('account_me', {p_token: session.token}); if (!me) setSession(null); }
+  catch(e) { /* offline: Sitzung behalten */ }
+}
+function renderAccountsBlock(){
+  const list = Object.values(profiles).sort((a,b) => a.name.localeCompare(b.name, 'de'));
+  const gamesOf = n => history.filter(g => participants(g).some(x => nkey(x) === nkey(n))).length;
+  return `<div><div class="row between" style="margin-bottom:6px"><span class="label">Angemeldete Profile · ${list.length}</span>
+      ${session ? '' : `<button class="btn ghost small" data-act="account">Profil erstellen</button>`}</div>
+    ${list.length ? `<div class="accounts">${list.map(p => `<button class="acc-row" data-act="profile" data-name="${esc(p.name)}">
+        ${avatar(p.name)}<span class="acc-main"><b>${esc(p.name)}${isMe(p.name) ? ' <small class="badge dim">du</small>' : ''}</b>${p.motto ? `<small>„${esc(p.motto)}“</small>` : ''}</span>
+        <span class="acc-meta mono">${gamesOf(p.name)} Spiele${p.since ? `<br>seit ${fmtDate(new Date(p.since).getTime())}` : ''}</span></button>`).join('')}</div>`
+      : `<div class="note">Noch keine Profile. Über das Icon oben rechts kann sich jeder mit Name und Passwort anmelden. Mitspielen geht auch ohne.</div>`}
+  </div>`;
 }
 
 /* ---------- Statistik ---------- */
@@ -1531,6 +1598,7 @@ function openSheet(view){
   if (sheetView && sheetView.cleanup) sheetView.cleanup();
   sheetView = view; sheetEl.hidden = false; document.body.classList.add('sheet-open');
   renderSheet();
+  sheetEl.querySelector('.sheet-panel').scrollTop = 0;
 }
 function closeSheet(){
   if (sheetView && sheetView.cleanup) sheetView.cleanup();
@@ -1551,6 +1619,7 @@ function renderSheet(){
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetView) closeSheet(); });
 $('#extras-btn').addEventListener('click', () => openSheet({kind:'extras'}));
+$('#me-btn').addEventListener('click', () => openSheet({kind:'account'}));
 
 const back = `<button class="btn ghost small sheet-back-btn" data-x="menu">← Extras</button>`;
 const currentRoster = () => (S.tab === 'flip7' ? S.flip7.players : S.players);
@@ -1564,7 +1633,7 @@ const SHEETS = {
       <button class="tool" data-x="open" data-k="coin"><b>Münze werfen</b><span>Kopf oder Zahl</span></button>
       <button class="tool" data-x="open" data-k="teams"><b>Teams losen</b><span>Zufällig aufteilen</span></button>
       <button class="tool" data-x="open" data-k="wheel"><b>Was spielen wir?</b><span>Das Spielrad entscheidet</span></button>
-      <button class="tool" data-x="open" data-k="me"><b>Profile</b><span>Emoji und Spruch, freiwillig</span></button>
+      <button class="tool" data-x="open" data-k="me"><b>Profile</b><span>Alle Spieler und Konten</span></button>
     </div>
     <div class="settings">
       <label class="toggle"><input type="checkbox" id="set-live" ${S.liveShare ? 'checked' : ''}> Meine Partie live teilen <small>${pin ? '' : '(braucht den Gruppen-PIN)'}</small></label>
@@ -1622,35 +1691,89 @@ const SHEETS = {
       </div>`;
   },
 
-  /* Profile-Übersicht */
+  /* Profile-Übersicht (aus den Extras) */
   me(){
-    const known = [...new Set([...S.players, ...S.flip7.players, ...history.flatMap(participants), ...Object.keys(profiles)])].sort((a,b) => a.localeCompare(b, 'de'));
-    return `${back}<h2>Profile</h2>
-      <p class="muted">Profile sind freiwillig. Mitspielen geht immer nur mit Namen. Mit Profil gibt es ein Emoji neben dem Namen und einen Spruch. Statistiken, Erfolge und Rivalitäten sieht jeder, auch ohne Profil.</p>
-      <div class="plist">${known.map(n => `<button class="pitem" data-x="profile" data-name="${esc(n)}">${avatar(n)}<span>${esc(n)}</span><small>${profileOf(n) ? 'Profil' : 'nur Name'}</small></button>`).join('') || '<span class="muted">Noch keine Spieler.</span>'}</div>`;
+    const known = [...new Set([...S.players, ...S.flip7.players, ...history.flatMap(participants), ...Object.values(profiles).map(p => p.name)])]
+      .filter((n, i, arr) => arr.findIndex(x => nkey(x) === nkey(n)) === i).sort((a,b) => a.localeCompare(b, 'de'));
+    return `${back}<h2>Profile & Spieler</h2>
+      <p class="muted">Ein Konto ist freiwillig. Mitspielen geht immer nur mit Namen. Mit Konto gibt es Emoji, Spruch und ein eigenes Profil. Statistiken sieht man für jeden Namen.</p>
+      <div class="row"><button class="btn small" data-x="account">${session ? 'Mein Profil' : 'Anmelden oder Konto erstellen'}</button></div>
+      <div class="plist">${known.map(n => `<button class="pitem" data-x="profile" data-name="${esc(n)}">${avatar(n)}<span>${esc(n)}</span><small>${profileOf(n) ? 'Konto' : 'nur Name'}</small></button>`).join('') || '<span class="muted">Noch keine Spieler.</span>'}</div>`;
+  },
+
+  /* Anmelden / Registrieren / eigenes Konto */
+  account(v){
+    if (session) return SHEETS.profile({...v, name: session.name, own: true});
+    v.mode = v.mode || 'login';
+    const EMOJIS = ['🦊','🐻','🐼','🦁','🐯','🐸','🐙','🦄','🐺','🦉','🐧','🐢','🔥','⚡','🌵','🍕','🎩','👑','🎯','🚀','🍀','💎','🥨','🐉'];
+    const tabs = `<div class="seg wide" role="tablist">
+      <button data-x="acc-mode" data-m="login" aria-pressed="${v.mode === 'login'}">Anmelden</button>
+      <button data-x="acc-mode" data-m="register" aria-pressed="${v.mode === 'register'}">Konto erstellen</button></div>`;
+    const err = v.err ? `<div class="note" style="color:var(--mark);border-color:var(--mark)">${esc(v.err)}</div>` : '';
+    if (v.mode === 'login') return `<h2>Anmelden</h2>${tabs}${err}
+      <form class="stack" data-xform="login" style="gap:10px">
+        <label><div class="label">Name</div><input id="acc-name" class="text-in" autocomplete="username" maxlength="18" required value="${esc(v.name || '')}"></label>
+        <label><div class="label">Passwort</div><input id="acc-pw" class="text-in" type="password" autocomplete="current-password" required></label>
+        <div class="row between"><span class="label">Kein Konto? Oben auf „Konto erstellen“.</span><button class="btn solid" ${v.busy ? 'disabled' : ''}>Anmelden</button></div>
+      </form>`;
+    return `<h2>Konto erstellen</h2>${tabs}${err}
+      <p class="muted">Nimm denselben Namen, den ihr beim Spielen eintragt. Dann zählen alle Spiele mit diesem Namen automatisch zu deinem Profil.</p>
+      <form class="stack" data-xform="register" style="gap:10px">
+        <label><div class="label">Name (= Spielername)</div><input id="acc-name" class="text-in" autocomplete="username" maxlength="18" minlength="2" required value="${esc(v.name || '')}"></label>
+        <label><div class="label">Passwort (mind. 4 Zeichen)</div><input id="acc-pw" class="text-in" type="password" autocomplete="new-password" minlength="4" required></label>
+        <label><div class="label">Passwort wiederholen</div><input id="acc-pw2" class="text-in" type="password" autocomplete="new-password" minlength="4" required></label>
+        ${pin ? '' : `<label><div class="label">Gruppen-PIN</div><input id="acc-pin" class="text-in" type="password" inputmode="numeric" required value="${esc(v.gpin || '')}"></label>`}
+        <div><div class="label" style="margin-bottom:6px">Emoji (optional)</div>
+          <div class="emoji-grid">${EMOJIS.map(e => `<button type="button" class="emo-btn" data-x="reg-emo" data-e="${e}" aria-pressed="${v.emoji === e}">${e}</button>`).join('')}</div></div>
+        <label><div class="label">Spruch (optional)</div><input id="motto" class="text-in" maxlength="80" value="${esc(v.motto || '')}" placeholder="z. B. Ich würfle nicht, ich treffe."></label>
+        <div class="row between"><span class="label">${pin ? 'Gruppen-PIN ist auf diesem Gerät gespeichert' : 'Nur mit Gruppen-PIN möglich'}</span><button class="btn solid" ${v.busy ? 'disabled' : ''}>Konto erstellen</button></div>
+      </form>`;
   },
 
   profile(v){
-    const name = v.name, p = profileOf(name) || {emoji:'', motto:''};
-    const st = playerStats(name, history);
-    const h2h = headToHead(history).filter(o => o.a === name || o.b === name).map(o => o.a === name ? {opp:o.b, me:o.wa, them:o.wb, t:o.t, n:o.n} : {opp:o.a, me:o.wb, them:o.wa, t:o.t, n:o.n}).sort((a,b) => b.n - a.n);
-    const myRecs = computeRecords(history).filter(r => r.who.split(' & ').includes(name));
+    const name = (profileOf(v.name) || {}).name || v.name, p = profileOf(name) || {emoji:'', motto:''};
+    const mine = isMe(name);
+    const hist = history.map(g => g);  // Spielnamen können anders geschrieben sein: Vergleich ohne Groß/Klein
+    const alias = n => nkey(n) === nkey(name) ? name : n;
+    const norm = hist.map(g => ({...g, ranking: g.ranking.map(r => ({...r, name: g.type === 'padel' ? r.name : alias(r.name)})), winners: g.type === 'padel' ? g.winners : g.winners.map(alias), losers: g.type === 'padel' ? g.losers : g.losers.map(alias)}));
+    const st = playerStats(name, norm);
+    const h2h = headToHead(norm).filter(o => o.a === name || o.b === name).map(o => o.a === name ? {opp:o.b, me:o.wa, them:o.wb, t:o.t, n:o.n} : {opp:o.a, me:o.wb, them:o.wa, t:o.t, n:o.n}).sort((a,b) => b.n - a.n);
+    const myRecs = computeRecords(norm).filter(r => r.who.split(' & ').some(w => nkey(w) === nkey(name)));
     const quote = st.played ? Math.round(100 * st.wins / st.played) : 0;
-    if (v.edit) {
+    const topBtn = v.own ? '' : back;
+    if (v.edit && mine) {
       const EMOJIS = ['🦊','🐻','🐼','🦁','🐯','🐸','🐙','🦄','🐺','🦉','🐧','🐢','🔥','⚡','🌵','🍕','🎩','👑','🎯','🚀','🍀','💎','🥨','🐉'];
-      return `<button class="btn ghost small sheet-back-btn" data-x="profile-view">← Zurück</button><h2>${esc(name)} · Profil</h2>
+      return `<button class="btn ghost small sheet-back-btn" data-x="profile-view">← Zurück</button><h2>Profil bearbeiten</h2>
         <form class="stack" data-xform="profile" style="gap:12px">
           <div><div class="label" style="margin-bottom:6px">Emoji</div>
             <div class="emoji-grid">${EMOJIS.map(e => `<button type="button" class="emo-btn" data-x="emo" data-e="${e}" aria-pressed="${(v.emoji ?? p.emoji) === e}">${e}</button>`).join('')}
             <input id="emo-custom" maxlength="4" placeholder="eigenes" value="${esc(EMOJIS.includes(v.emoji ?? p.emoji) ? '' : (v.emoji ?? p.emoji))}" aria-label="Eigenes Emoji"></div></div>
-          <label><div class="label" style="margin-bottom:6px">Spruch (optional)</div><input id="motto" class="text-in" maxlength="80" value="${esc(v.motto ?? p.motto)}" placeholder="z. B. Ich würfle nicht, ich treffe."></label>
-          <div class="row between"><span class="label">${pin ? 'Wird für alle gespeichert' : 'Braucht den Gruppen-PIN (Bestenliste)'}</span><button class="btn solid" ${pin ? '' : 'disabled'}>Speichern</button></div>
+          <label><div class="label" style="margin-bottom:6px">Spruch</div><input id="motto" class="text-in" maxlength="80" value="${esc(v.motto ?? p.motto)}" placeholder="z. B. Ich würfle nicht, ich treffe."></label>
+          <div class="row" style="justify-content:flex-end"><button class="btn solid">Speichern</button></div>
+        </form>`;
+    }
+    if (v.pw && mine) {
+      return `<button class="btn ghost small sheet-back-btn" data-x="profile-view">← Zurück</button><h2>Passwort ändern</h2>
+        ${v.err ? `<div class="note" style="color:var(--mark);border-color:var(--mark)">${esc(v.err)}</div>` : ''}
+        <form class="stack" data-xform="password" style="gap:10px">
+          <label><div class="label">Aktuelles Passwort</div><input id="pw-old" class="text-in" type="password" autocomplete="current-password" required></label>
+          <label><div class="label">Neues Passwort (mind. 4 Zeichen)</div><input id="pw-new" class="text-in" type="password" autocomplete="new-password" minlength="4" required></label>
+          <label><div class="label">Neues Passwort wiederholen</div><input id="pw-new2" class="text-in" type="password" autocomplete="new-password" minlength="4" required></label>
+          <div class="row" style="justify-content:flex-end"><button class="btn solid">Ändern</button></div>
         </form>`;
     }
     const typeRows = GAME_TYPES.filter(t => st.byType[t]).map(t => { const b = st.byType[t]; return `<div class="kv"><span>${TYPE_LABEL[t]}</span><span class="mono">${b.wins} / ${b.played} · ${Math.round(100*b.wins/b.played)} %</span></div>`; }).join('');
-    return `${back}
-      <div class="prof-head">${avatar(name, true)}<div><h2>${esc(name)}</h2>${p.motto ? `<div class="motto">„${esc(p.motto)}“</div>` : `<div class="muted">Kein Profil angelegt</div>`}</div></div>
-      <div class="row"><button class="btn small" data-x="profile-edit">${profileOf(name) ? 'Profil bearbeiten' : 'Profil anlegen (optional)'}</button></div>
+    const inList = S.players.some(n => nkey(n) === nkey(name));
+    return `${topBtn}
+      <div class="prof-head">${avatar(name, true)}<div><h2>${esc(name)}</h2>
+        ${p.motto ? `<div class="motto">„${esc(p.motto)}“</div>` : ''}
+        <div class="label">${profileOf(name) ? `Konto${p.since ? ' seit ' + fmtDate(new Date(p.since).getTime()) : ''}${mine ? ' · angemeldet' : ''}` : 'Kein Konto · nur Spielername'}</div></div></div>
+      ${mine ? `<div class="row">
+          <button class="btn small" data-x="profile-edit">Profil bearbeiten</button>
+          <button class="btn ghost small" data-x="pw-edit">Passwort ändern</button>
+          ${inList ? '' : `<button class="btn ghost small" data-x="add-me">Mich zur Spielerliste</button>`}
+          <button class="btn ghost small" data-x="logout">Abmelden</button></div>`
+        : (!profileOf(name) && !session ? `<div class="row"><button class="btn ghost small" data-x="account-register" data-name="${esc(name)}">Das bin ich: Konto erstellen</button></div>` : '')}
       <div class="kpis"><div><b>${st.played}</b><span>Spiele</span></div><div><b>${st.wins}</b><span>Siege</span></div><div><b>${quote} %</b><span>Quote</span></div><div><b>${st.bestStreak}</b><span>Beste Serie</span></div></div>
       ${st.form.length ? `<div><div class="label">Form · letzte ${st.form.length}</div><div class="form">${st.form.map(f => `<span class="f-${f === 'S' ? 'w' : f === 'L' ? 'l' : 'm'}" title="${f === 'S' ? 'Sieg' : f === 'L' ? 'Letzter' : 'Mittelfeld'}">${f}</span>`).join('')}</div></div>` : ''}
       ${typeRows ? `<div><div class="label">Siege je Spiel</div>${typeRows}</div>` : ''}
@@ -1807,8 +1930,15 @@ sheetEl.addEventListener('click', e => {
   }
   if (x === 'wheel-go') { S.tab = el.dataset.t; save(); closeSheet(); render(); return; }
   if (x === 'profile') return openSheet({kind:'profile', name: el.dataset.name});
+  if (x === 'account') return openSheet({kind:'account'});
+  if (x === 'account-register') return openSheet({kind:'account', mode:'register', name: el.dataset.name});
+  if (x === 'acc-mode') { v.mode = el.dataset.m; v.err = ''; v.name = ($('#acc-name') || {}).value || v.name; renderSheet(); return; }
+  if (x === 'reg-emo') { v.name = $('#acc-name').value; v.motto = $('#motto').value; if ($('#acc-pin')) v.gpin = $('#acc-pin').value; v.emoji = v.emoji === el.dataset.e ? '' : el.dataset.e; renderSheet(); return; }
+  if (x === 'pw-edit') { v.pw = true; v.err = ''; renderSheet(); return; }
+  if (x === 'logout') { accountLogout(); toast('Abgemeldet.'); closeSheet(); if (S.tab === 'board') render(); return; }
+  if (x === 'add-me') { if (S.players.length >= MAX_PLAYERS) { toast(`Spielerliste ist voll (max. ${MAX_PLAYERS}).`); return; } S.players.push(session.name); applyPlayers(); save(); render(); toast(`${session.name} ist in der Spielerliste.`); renderSheet(); return; }
   if (x === 'profile-edit') { v.edit = true; renderSheet(); return; }
-  if (x === 'profile-view') { v.edit = false; v.emoji = undefined; v.motto = undefined; renderSheet(); return; }
+  if (x === 'profile-view') { v.edit = false; v.pw = false; v.err = ''; v.emoji = undefined; v.motto = undefined; renderSheet(); return; }
   if (x === 'emo') { v.motto = $('#motto').value; v.emoji = el.dataset.e; renderSheet(); return; }
 });
 sheetEl.addEventListener('change', e => {
@@ -1816,12 +1946,41 @@ sheetEl.addEventListener('change', e => {
   if (e.target.id === 'set-wake') { S.wake = e.target.checked; save(); updateWake(); }
 });
 sheetEl.addEventListener('submit', async e => {
+  const f = e.target.dataset.xform, v = sheetView;
+  if (f === 'login' || f === 'register') {
+    e.preventDefault();
+    const name = $('#acc-name').value.trim(), pw = $('#acc-pw').value;
+    v.name = name; v.err = '';
+    if (f === 'register') {
+      v.motto = $('#motto').value.trim();
+      if (pw !== $('#acc-pw2').value) { v.err = 'Die Passwörter stimmen nicht überein.'; renderSheet(); return; }
+      const gp = pin || ($('#acc-pin') ? $('#acc-pin').value.trim() : '');
+      v.gpin = pin ? '' : gp;
+      v.busy = true; renderSheet();
+      try { await accountRegister(name, pw, gp, v.emoji || '', v.motto); v.busy = false; toast(`Willkommen, ${session.name}!`); openSheet({kind:'account'}); if (S.tab === 'board') render(); }
+      catch(err) { v.busy = false; const pinWrong = /PIN/.test(err.message || ''); if (pinWrong) v.gpin = ''; v.err = pinWrong ? 'Gruppen-PIN ist falsch.' : errText(err); renderSheet(); }
+    } else {
+      v.busy = true; renderSheet();
+      try { await accountLogin(name, pw); v.busy = false; toast(`Hallo ${session.name}!`); openSheet({kind:'account'}); if (S.tab === 'board') render(); }
+      catch(err) { v.busy = false; v.err = errText(err); renderSheet(); }
+    }
+    return;
+  }
+  if (f === 'password') {
+    e.preventDefault();
+    const o = $('#pw-old').value, n1 = $('#pw-new').value, n2 = $('#pw-new2').value;
+    if (n1 !== n2) { v.err = 'Die neuen Passwörter stimmen nicht überein.'; renderSheet(); return; }
+    try { await rpc('change_password', {p_token: session.token, p_old: o, p_new: n1}); v.pw = false; v.err = ''; toast('Passwort geändert.'); renderSheet(); }
+    catch(err) { v.err = errText(err); renderSheet(); }
+    return;
+  }
   if (!e.target.matches('[data-xform="profile"]')) return;
   e.preventDefault();
-  const v = sheetView, custom = $('#emo-custom').value.trim();
-  const emoji = custom || v.emoji || (profileOf(v.name) || {}).emoji || '';
+  const who = v.kind === 'account' && session ? session.name : v.name;
+  const custom = $('#emo-custom').value.trim();
+  const emoji = custom || v.emoji || (profileOf(who) || {}).emoji || '';
   const motto = $('#motto').value.trim();
-  if (await saveProfile(v.name, emoji, motto)) { v.edit = false; v.emoji = undefined; v.motto = undefined; renderSheet(); if (S.tab === 'board') render(); }
+  if (await saveProfile(who, emoji, motto)) { v.edit = false; v.emoji = undefined; v.motto = undefined; renderSheet(); if (S.tab === 'board') render(); }
 });
 // Tastatur für "Rollen-Buttons" (Verlauf, Rekorde)
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="button"][data-act]')) { e.preventDefault(); e.target.click(); } });
@@ -1879,6 +2038,7 @@ function renderLiveBar(){
 }
 $('#livebar').addEventListener('click', e => { const b = e.target.closest('[data-live]'); if (b) openSheet({kind:'live', id:b.dataset.live}); });
 setInterval(() => { if (document.visibilityState === 'visible') livePoll(); }, 8000);
+renderMeBtn(); checkSession();
 setTimeout(livePoll, 600);
 
 /* ---------- Bildschirm bleibt an ---------- */
