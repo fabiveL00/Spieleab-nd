@@ -49,7 +49,7 @@ h1 small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;le
 .sync{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 
 nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;justify-content:space-between;gap:4px;border-bottom:1px solid var(--rule);margin-bottom:16px}
-nav.tabs button{background:none;border:0;padding:12px 2px 10px;font-family:var(--display);font-weight:800;font-size:clamp(14px,4.2vw,19px);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+nav.tabs button{background:none;border:0;padding:12px 2px 10px;font-family:var(--display);font-weight:800;font-size:clamp(13px,3.8vw,19px);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
 h2{font-family:var(--display);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:0;line-height:1}
@@ -331,6 +331,137 @@ html,body{transition:background-color .3s ease}
 :root[data-game="flip7"] .winner .t{font-weight:400}
 :root[data-game="flip7"] .label, :root[data-game="flip7"] .sync, :root[data-game="flip7"] h1 small{color:#4a4128}
 :root[data-game="flip7"] h1::before{content:"7 ";color:var(--mark)}
+/* ================= Erweiterungen ================= */
+.top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#extras-btn{white-space:nowrap}
+.quip{font-style:italic;font-size:13.5px;margin-top:6px;color:var(--ink)}
+.muted{color:var(--muted);font-size:13.5px}
+
+/* Toast */
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,24px);opacity:0;pointer-events:none;
+  background:var(--ink);color:var(--paper);padding:11px 16px;border-radius:10px;font-weight:600;font-size:14px;max-width:min(92vw,460px);text-align:center;z-index:70;
+  box-shadow:0 8px 30px #0005;transition:opacity .25s ease, transform .25s ease}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Live-Leiste */
+#livebar{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.live-pill{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1.5px solid var(--ink);background:var(--card);border-radius:8px;padding:9px 12px;font-size:13.5px}
+.live-pill b{font-family:var(--mono);font-size:12px;letter-spacing:.06em;white-space:nowrap}
+.lp-who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.lp-go{font-weight:700;white-space:nowrap}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#e0352b;flex:none;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.live-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+
+/* Sheet */
+#sheet{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.sheet-back{position:absolute;inset:0;background:#0008}
+.sheet-panel{position:relative;background:var(--paper);color:var(--ink);width:min(100%,760px);max-height:92vh;max-height:92dvh;overflow:auto;border-radius:16px 16px 0 0;
+  padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;box-shadow:0 -10px 40px #0006}
+@media (min-width:800px){ #sheet{align-items:center} .sheet-panel{border-radius:16px;max-height:88vh} }
+.sheet-panel #sheet-body{display:flex;flex-direction:column;gap:14px}
+.sheet-x{position:sticky;top:0;align-self:flex-end;margin-bottom:-44px;z-index:2;border:1.5px solid var(--rule);background:var(--card);width:36px;height:36px;border-radius:50%;font-size:20px;line-height:1}
+.sheet-back-btn{align-self:flex-start}
+body.sheet-open{overflow:hidden}
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:10px}
+.tool{border:1.5px solid var(--ink);background:var(--card);border-radius:10px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:3px}
+.tool b{font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.02em}
+.tool span{font-size:13px;color:var(--muted)}
+.settings{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--rule);padding-top:12px}
+.settings small{color:var(--muted)}
+.chipbtn{border:1.5px solid var(--rule);background:var(--card);border-radius:8px;min-width:38px;height:36px;font-weight:700;font-family:var(--mono)}
+.chipbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* Finger-Auswahl */
+.finger-zone{position:relative;height:min(58vh,480px);border:2px dashed var(--rule);border-radius:14px;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;background:var(--card);display:flex;align-items:center;justify-content:center;text-align:center}
+.finger-zone p{max-width:24ch;color:var(--muted);font-weight:600;pointer-events:none}
+.fdot{position:absolute;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;border:6px solid var(--c);background:color-mix(in srgb, var(--c) 25%, transparent);pointer-events:none;animation:grow .35s ease-out;transition:transform .4s ease, opacity .4s ease}
+.fdot.win{transform:scale(1.6);background:var(--c);box-shadow:0 0 0 12px color-mix(in srgb, var(--c) 30%, transparent)}
+.fdot.lose{opacity:.12;transform:scale(.6)}
+@keyframes grow{from{transform:scale(.3)}to{transform:scale(1)}}
+.pick-result{text-align:center;font-size:18px;min-height:28px}
+.pick-result b{font-family:var(--display);font-size:30px;text-transform:uppercase}
+
+/* Würfel */
+.dice-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding-block:10px}
+.die{width:68px;height:68px;border:2px solid var(--ink);border-radius:14px;background:var(--card);display:grid;grid-template-columns:repeat(3,1fr);padding:9px;gap:2px;box-shadow:3px 3px 0 var(--ink)}
+.die i{border-radius:50%;margin:3px}
+.die i.on{background:var(--ink)}
+.dice-row.shake .die{transform:rotate(calc((var(--r,1) * 8deg)))}
+.dice-row.shake .die:nth-child(odd){--r:-1}
+.dice-sum{font-family:var(--mono);font-weight:700;font-size:18px}
+
+/* Münze */
+.coin-stage{display:flex;justify-content:center;padding-block:14px;perspective:600px}
+.coin{width:120px;height:120px;border-radius:50%;border:4px solid var(--ink);background:var(--card);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:56px;font-weight:900;box-shadow:inset 0 0 0 8px var(--soft)}
+.coin.flip{animation:coinflip .9s ease-in-out}
+@keyframes coinflip{0%{transform:rotateY(0) translateY(0)}50%{transform:rotateY(900deg) translateY(-50px)}100%{transform:rotateY(1800deg) translateY(0)}}
+
+/* Teams & Spielrad */
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));gap:10px}
+.team{border:1.5px solid var(--ink);border-radius:10px;padding:10px 12px;background:var(--card);display:flex;flex-direction:column;gap:4px}
+.wheel{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wheel-item{border:2px solid var(--rule);border-radius:12px;padding:22px 10px;text-align:center;font-family:var(--display);font-size:24px;text-transform:uppercase;background:var(--card);transition:background .08s, color .08s}
+.wheel-item.hi{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.wheel-item.won{box-shadow:0 0 0 4px var(--mark)}
+
+/* Profile */
+.ava{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--soft);border:1px solid var(--rule);font-size:12px;font-weight:700;margin-right:6px;flex:none;vertical-align:middle;line-height:1}
+.ava.emo{background:transparent;border-color:transparent;font-size:18px}
+.ava.big{width:64px;height:64px;font-size:28px;margin:0}
+.ava.big.emo{font-size:48px}
+.name-link{border:0;background:none;padding:0;font:inherit;font-weight:600;color:inherit;display:inline-flex;align-items:center;text-align:left;cursor:pointer}
+.name-link:hover{text-decoration:underline;text-underline-offset:3px}
+.name-link.right .ava{margin:0 0 0 6px}
+.plist{display:flex;flex-direction:column}
+.pitem{display:flex;align-items:center;gap:6px;border:0;border-bottom:1px solid var(--rule);background:none;padding:10px 2px;text-align:left;font-weight:600}
+.pitem span{flex:1}
+.pitem small{color:var(--muted);font-weight:400;font-family:var(--mono);font-size:11px}
+.prof-head{display:flex;gap:14px;align-items:center}
+.motto{font-style:italic;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpis div{border:1.5px solid var(--rule);border-radius:10px;padding:10px 6px;text-align:center;background:var(--card)}
+.kpis b{display:block;font-family:var(--mono);font-size:20px}
+.kpis span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.form{display:flex;gap:4px;margin-top:6px}
+.form span{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;border:1.5px solid var(--rule)}
+.form .f-w{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.form .f-l{border-color:var(--mark);color:var(--mark)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding-block:7px;border-bottom:1px solid var(--rule);font-size:14px}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:8px;margin-top:6px}
+.ach{border:1.5px dashed var(--rule);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:2px;opacity:.5}
+.ach b{font-size:14px}
+.ach span{font-size:12px;color:var(--muted)}
+.ach.on{opacity:1;border:1.5px solid var(--ink);background:var(--card)}
+.ach.on b::before{content:"★ ";color:var(--mark)}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.emo-btn{width:44px;height:44px;border:1.5px solid var(--rule);background:var(--card);border-radius:10px;font-size:24px;line-height:1}
+.emo-btn[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+#emo-custom{width:90px;height:44px;border:1.5px solid var(--rule);border-radius:10px;background:var(--card);padding:0 10px;font-size:18px}
+.text-in{width:100%;border:1.5px solid var(--rule);border-radius:8px;background:var(--card);padding:10px 12px}
+
+/* Rekorde & Rivalitäten */
+.records{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.rec{border:1.5px solid var(--rule);border-radius:10px;padding:10px 12px;background:var(--card);display:flex;flex-direction:column;gap:2px}
+.rec-t{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--mono)}
+.rec-v{font-family:var(--display);font-weight:800;font-size:19px;line-height:1.1;overflow-wrap:anywhere}
+.rec-w{font-size:13px;font-weight:600}
+.rivals{display:flex;flex-direction:column;border:1.5px solid var(--rule);border-radius:10px;background:var(--card)}
+.rival{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--rule)}
+.rival:last-child{border-bottom:0}
+.rival .right{justify-self:end}
+.rv-score{font-family:var(--mono);font-size:18px;white-space:nowrap}
+.rv-score small{font-size:11px;color:var(--muted)}
+.lead-s{color:var(--mark)}
+.clickable-res{cursor:pointer}
+.clickable-res:hover{background:var(--soft)}
+
+/* Nur-Ansehen (Live & Verlauf) */
+.ro .btn,.ro .point-btns,.ro .toggle,.ro .winner,.ro .note,.ro .cloud select{display:none!important}
+.ro[data-mode="history"] .round,.ro[data-mode="history"] .f7-round{display:none!important}
+.ro tr.clickable{cursor:default}
+.ro td.cat span{display:none}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -350,8 +481,8 @@ body{margin:0;overscroll-behavior-y:none}
 
 <div class="wrap">
   <header class="top">
-    <h1>Spieleabend<small>Zählblock · Kniffel · Wizard · Padel</small></h1>
-    <span class="sync" id="sync">auf diesem Gerät gespeichert</span>
+    <h1>Spieleabend<small>Zählblock · Kniffel · Wizard · Flip 7 · Padel</small></h1>
+    <div class="top-right"><span class="sync" id="sync">auf diesem Gerät gespeichert</span><button class="btn ghost small" id="extras-btn" aria-label="Extras öffnen">⚄ Extras</button></div>
   </header>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="kniffel" id="tab-kniffel">Kniffel</button>
@@ -360,6 +491,7 @@ body{margin:0;overscroll-behavior-y:none}
     <button role="tab" data-tab="padel" id="tab-padel">Padel</button>
     <button role="tab" data-tab="board" id="tab-board">Bestenliste</button>
   </nav>
+  <div id="livebar" hidden></div>
   <main id="app"></main>
 </div>
 <canvas id="confetti" hidden></canvas>
@@ -412,7 +544,8 @@ if (!S.padel) S.padel = freshPadel();
 if (!S.flip7) S.flip7 = freshFlip(S.players);
 let boardFilter = 'alle';
 let editingPlayers = false;
-function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {} }
+let viewMode = null; // 'live' | 'history' beim Nur-Ansehen
+function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {} if (typeof liveSchedule === 'function') liveSchedule(); }
 
 /* ---------- Verlauf: Supabase + Offline-Warteschlange ---------- */
 const SB_URL = 'https://rqdihhpmdlvqnqvowxkx.supabase.co';
@@ -462,7 +595,7 @@ const isPinError = e => e && (e.body && e.body.code === '28000' || /PIN/i.test(e
 
 async function fetchRemote(){
   try {
-    const rows = await sb('/rest/v1/games?select=id,ts,type,ranking,winners,losers&order=ts.desc&limit=1000');
+    const rows = await sb('/rest/v1/games?select=*&order=ts.desc&limit=1000');
     remote = rows; store(LS_REMOTE, remote); online = true;
   } catch(e) { if (!e.status) online = false; }
 }
@@ -472,7 +605,7 @@ async function flush(){
   flushing = true;
   try {
     for (const g of [...pending]) {
-      const game = {id:g.id, ts:g.ts, type:g.type, ranking:g.ranking, winners:g.winners, losers:g.losers};
+      const game = {id:g.id, ts:g.ts, type:g.type, ranking:g.ranking, winners:g.winners, losers:g.losers, detail:g.detail || null};
       await sb('/rest/v1/rpc/add_game', { method:'POST', body: JSON.stringify({p_pin:pin, p_game:game}) });
       pending = pending.filter(p => p.id !== g.id); store(LS_PENDING, pending);
       if (!remote.some(r => r.id === game.id)) remote.unshift(game);
@@ -485,7 +618,7 @@ async function flush(){
   flushing = false;
 }
 async function sync(){
-  await flush(); await fetchRemote(); rebuildHistory(); setSync();
+  await flush(); await fetchRemote(); if (typeof fetchProfiles === 'function') await fetchProfiles(); rebuildHistory(); setSync();
   if (S.tab === 'board') render();
 }
 async function recordGame(g){
@@ -554,6 +687,7 @@ function roster(){ return S.tab === 'flip7' ? S.flip7.players : S.players; }
 function rosterLimit(){ return S.tab === 'flip7' ? Infinity : MAX_PLAYERS; }
 function playersBlock(context){
   const list = roster();
+  if (viewMode) return `<div class="players">${list.map(p => `<span class="chip" style="padding-right:12px">${esc(p)}</span>`).join('')}</div>`;
   if (!editingPlayers) {
     return `<div class="row between">
       <div class="players">${list.map(p => `<span class="chip" style="padding-right:12px">${esc(p)}</span>`).join('')}${context === 'flip7' ? `<span class="label">${list.length} Spieler</span>` : ''}</div>
@@ -767,7 +901,7 @@ function pPoint(t){
     if (setDone) {
       const w = setsWon(P);
       if (w[t] === 2) { P.done = t; }
-      else P.sets.push([0,0]);
+      else { P.sets.push([0,0]); toastQuip('set', {p: P.teams[t]}); }
     }
   }
   save(); render();
@@ -910,7 +1044,8 @@ const LOSER = { kniffel:'Pechwürfel', wizard:'Falschansager', padel:'Netzroller
 function winnerCard(type, g){
   return `<div class="winner"><div class="label">${TITLES[type]}</div><div class="t">${esc(g.winners.join(' & '))}</div>
     <div class="s">${g.ranking.map((r,i) => `${i+1}. ${esc(r.name)} (${r.score})`).join(' · ')}</div>
-    <div class="s">${esc(LOSER[type])}: <b>${esc(g.losers.join(' & '))}</b> · gespeichert in der Bestenliste</div></div>`;
+    <div class="s">${esc(LOSER[type])}: <b>${esc(g.losers.join(' & '))}</b> · gespeichert in der Bestenliste</div>
+    ${typeof quipFor === 'function' ? `<div class="quip">„${esc(quipFor(g))}“</div>` : ''}</div>`;
 }
 function buildResult(type, ranking){
   ranking.sort((a,b) => b.score - a.score);
@@ -919,11 +1054,7 @@ function buildResult(type, ranking){
     winners: ranking.filter(r => r.score === top).map(r => r.name),
     losers: ranking.filter(r => r.score === bottom && bottom !== top).map(r => r.name) };
 }
-function splitTeam(name){ return name.split(/\s*(?:&|\+|\/|,|\bund\b)\s*/i).map(s => s.trim()).filter(Boolean); }
-
-/* ---------- Bestenliste ---------- */
-function renderBoard(){
-  const list = history.filter(g => boardFilter === 'alle' || g.type === boardFilter);
+function boardRows(list){
   const stats = {};
   list.forEach(g => {
     const names = g.type === 'padel' ? g.ranking.flatMap(r => splitTeam(r.name)) : g.ranking.map(r => r.name);
@@ -933,7 +1064,14 @@ function renderBoard(){
     wins.forEach(n => stats[n] && stats[n].wins++);
     loses.forEach(n => stats[n] && stats[n].last++);
   });
-  const rows = Object.values(stats).sort((a,b) => b.wins - a.wins || (b.wins/b.played) - (a.wins/a.played) || a.last - b.last);
+  return Object.values(stats).sort((a,b) => b.wins - a.wins || (b.wins/b.played) - (a.wins/a.played) || a.last - b.last);
+}
+function splitTeam(name){ return name.split(/\s*(?:&|\+|\/|,|\bund\b)\s*/i).map(s => s.trim()).filter(Boolean); }
+
+/* ---------- Bestenliste ---------- */
+function renderBoard(){
+  const list = history.filter(g => boardFilter === 'alle' || g.type === boardFilter);
+  const rows = boardRows(list);
   const maxLast = Math.max(0, ...rows.map(r => r.last));
   const filterBtn = (k, l) => `<button data-act="filter" data-f="${k}" aria-pressed="${boardFilter === k}">${l}</button>`;
   const fmt = ts => new Date(ts).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'}) + ' ' + new Date(ts).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
@@ -949,14 +1087,17 @@ function renderBoard(){
       ${rows.map((r,i) => { const q = Math.round(100 * r.wins / r.played);
         return `<div class="board-row">
           <span class="rank">${i+1}</span>
-          <span><span class="who">${esc(r.name)}${i === 0 && r.wins > 0 ? ' <span class="badge mark">Seriensieger</span>' : ''}${r.last === maxLast && maxLast > 0 ? ' <span class="badge dim">Rote Laterne</span>' : ''}</span><div class="bar"><i style="width:${q}%"></i></div></span>
+          <span><span class="who"><button class="name-link" data-act="profile" data-name="${esc(r.name)}">${avatar(r.name)}${esc(r.name)}</button>${i === 0 && r.wins > 0 ? ' <span class="badge mark">Seriensieger</span>' : ''}${r.last === maxLast && maxLast > 0 ? ' <span class="badge dim">Rote Laterne</span>' : ''}</span><div class="bar"><i style="width:${q}%"></i></div></span>
           <span class="mono">${r.wins}</span><span class="mono">${r.played}</span><span class="mono">${q}%</span>
         </div>`; }).join('')}
-    </div>` : `<div class="board"><div class="empty-state"><b>Noch keine Spiele</b>Beendet eine Partie Kniffel, Wizard oder Padel, dann taucht hier auf, wer den Abend dominiert.</div></div>`}
-    ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele</div><div class="log">
+    </div>` : `<div class="board"><div class="empty-state"><b>Noch keine Spiele</b>Beendet eine Partie Kniffel, Wizard, Flip 7 oder Padel, dann taucht hier auf, wer den Abend dominiert.</div></div>`}
+    ${rows.length ? `<div class="row"><button class="btn small" data-act="export">Bestenliste als Bild teilen</button></div>` : ''}
+    ${renderRecordsBlock(list)}
+    ${renderRivalsBlock(list)}
+    ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele · antippen für Details</div><div class="log">
       ${list.slice(0,30).map(g => `<div class="log-item">
         <span class="type">${TYPE_LABEL[g.type] || g.type}</span>
-        <span class="res"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}</span></span>
+        <span class="res clickable-res" data-act="game-detail" data-id="${esc(g.id)}" role="button" tabindex="0"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}</span></span>
         <button class="x" data-act="del-game" data-id="${esc(g.id)}" aria-label="Spiel löschen" title="Spiel löschen">×</button>
       </div>`).join('')}
     </div></div>` : ''}
@@ -972,6 +1113,7 @@ function render(){
   const tc = {kniffel:'#f5f6f0', wizard:'#0d1130', padel:'#0f3d73', flip7:'#ffcf33'}[S.tab];
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', tc || (m.media.includes('dark') ? '#111110' : '#fbfbf8')));
   const app = $('#app');
+  if (typeof updateWake === 'function') updateWake();
   app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : S.tab === 'flip7' ? renderFlip() : renderBoard();
 }
 
@@ -1001,7 +1143,7 @@ app.addEventListener('click', async e => {
   if (a === 'k-new') { S.kniffel = {scores:{}, example:false, saved:false}; S.players.forEach(p => S.kniffel.scores[p] = {}); save(); render(); return; }
   if (a === 'k-finish') {
     const res = buildResult('kniffel', S.players.map(p => ({name:p, score:kTotals(S.kniffel.scores[p]).total})));
-    S.kniffel.saved = res; save(); render(); confetti(); await recordGame({...res}); return;
+    S.kniffel.saved = res; save(); render(); confetti(); await recordGame({...res, detail:{players:[...S.players], scores:JSON.parse(JSON.stringify(S.kniffel.scores))}}); return;
   }
 
   const F = S.flip7;
@@ -1010,14 +1152,14 @@ app.addEventListener('click', async e => {
     if (a === 'f7-num') {
       const e = f7Entry(F.draft, p), v = +el.dataset.v;
       e.nums = e.nums.includes(v) ? e.nums.filter(x => x !== v) : (e.nums.length < 7 ? [...e.nums, v].sort((x,y) => x-y) : e.nums);
-      save(); render(); if (e.nums.length === 7 && !e.bust) confetti(); return;
+      save(); render(); if (e.nums.length === 7 && !e.bust) { confetti(); toastQuip('flip7', {p}); } return;
     }
     if (a === 'f7-mod') {
       const e = f7Entry(F.draft, p), v = +el.dataset.v;
       e.mods = e.mods.includes(v) ? e.mods.filter(x => x !== v) : [...e.mods, v]; save(); render(); return;
     }
     if (a === 'f7-x2') { const e = f7Entry(F.draft, p); e.x2 = !e.x2; save(); render(); return; }
-    if (a === 'f7-bust') { const e = f7Entry(F.draft, p); e.bust = !e.bust; save(); render(); return; }
+    if (a === 'f7-bust') { const e = f7Entry(F.draft, p); e.bust = !e.bust; save(); render(); if (e.bust) toastQuip('bust', {p}); return; }
     if (a === 'f7-clear') { F.draft = {}; save(); render(); return; }
     if (a === 'f7-score') {
       const r = {};
@@ -1033,7 +1175,7 @@ app.addEventListener('click', async e => {
     if (a === 'f7-finish') {
       const t = f7Totals(F);
       const res = buildResult('flip7', F.players.map(pl => ({name:pl, score:t[pl]})));
-      F.saved = res; F.cur = F.rounds.length; save(); render(); confetti(); await recordGame({...res}); return;
+      F.saved = res; F.cur = F.rounds.length; save(); render(); confetti(); await recordGame({...res, detail:{players:[...F.players], rounds:JSON.parse(JSON.stringify(F.rounds)), target:F.target}}); return;
     }
     return;
   }
@@ -1050,7 +1192,7 @@ app.addEventListener('click', async e => {
   if (a === 'w-score') {
     const r = {bids:{...W.draft.bids}, tricks:{...W.draft.tricks}, cloud: W.draft.cloud ? {...W.draft.cloud} : null};
     if (W.cur < W.rounds.length) W.rounds[W.cur] = r; else W.rounds.push(r);
-    W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; W.saved = false; save(); render(); return;
+    W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; W.saved = false; save(); render(); quipWizardRound(r, W.players); return;
   }
   if (a === 'w-edit') {
     const i = +el.dataset.i; W.cur = i;
@@ -1063,7 +1205,7 @@ app.addEventListener('click', async e => {
   if (a === 'w-finish') {
     const t = wTotals(W);
     const res = buildResult('wizard', W.players.map(p => ({name:p, score:t[p]})));
-    W.saved = res; W.cur = W.rounds.length; save(); render(); confetti(); await recordGame({...res}); return;
+    W.saved = res; W.cur = W.rounds.length; save(); render(); confetti(); await recordGame({...res, detail:{players:[...W.players], rounds:JSON.parse(JSON.stringify(W.rounds))}}); return;
   }
 
   const P = S.padel;
@@ -1077,10 +1219,13 @@ app.addEventListener('click', async e => {
   if (a === 'p-finish') {
     const w = setsWon(P);
     const res = buildResult('padel', [{name:P.teams[0], score:w[0]}, {name:P.teams[1], score:w[1]}]);
-    P.saved = res; save(); render(); await recordGame({...res}); return;
+    P.saved = res; save(); render(); await recordGame({...res, detail:{teams:[...P.teams], sets:JSON.parse(JSON.stringify(P.sets)), winner:P.done}}); return;
   }
 
   if (a === 'filter') { boardFilter = el.dataset.f; render(); return; }
+  if (a === 'profile') { openSheet({kind:'profile', name: el.dataset.name}); return; }
+  if (a === 'game-detail') { openSheet({kind:'game', id: el.dataset.id}); return; }
+  if (a === 'export') { exportBoard(); return; }
   if (a === 'pin-reset') { pin = ''; store(LS_PIN, ''); pinError = ''; setSync(); render(); return; }
   if (a === 'del-game') {
     if (el.dataset.confirm) { deleteGame(el.dataset.id); }
@@ -1095,8 +1240,13 @@ app.addEventListener('change', e => {
     const p = t.dataset.p, k = t.dataset.k;
     if (S.kniffel.example) { S.kniffel = {scores:{}, example:false, saved:false}; S.players.forEach(pl => S.kniffel.scores[pl] = {}); }
     S.kniffel.scores[p] = S.kniffel.scores[p] || {};
+    const upBefore = kTotals(S.kniffel.scores[p]).bonus;
     if (t.value === '') delete S.kniffel.scores[p][k]; else S.kniffel.scores[p][k] = +t.value;
-    S.kniffel.saved = false; save(); render(); return;
+    S.kniffel.saved = false; save(); render();
+    if (k === 'kn' && t.value === '50') toastQuip('kniffel', {p});
+    else if (k === 'kn' && t.value === '0') toastQuip('kniffelStrike', {p});
+    else if (!upBefore && kTotals(S.kniffel.scores[p]).bonus) toastQuip('bonus', {p});
+    return;
   }
   if (t.matches('[data-cloud-p]')) {
     const W = S.wizard;
@@ -1128,6 +1278,664 @@ app.addEventListener('submit', e => {
   if (list.length >= rosterLimit()) { playerMsg = `Maximal ${MAX_PLAYERS} Spieler. Nur bei Flip 7 ist die Anzahl frei.`; render(); return; }
   list.push(name); playerMsg = ''; save(); render(); setTimeout(() => $('#new-player')?.focus(), 0);
 });
+
+/* =====================================================================
+   Erweiterungen: Extras, Statistik, Profile, Sprüche, Live, Verlauf,
+   Export, Bildschirm-an
+   ===================================================================== */
+const DEVICE_ID = (() => { let id = load('spieleabend.device', null); if (!id) { id = uid() + uid(); store('spieleabend.device', id); } return id; })();
+const GAME_TYPES = ['kniffel','wizard','flip7','padel'];
+if (S.liveShare === undefined) S.liveShare = true;
+if (S.wake === undefined) S.wake = true;
+
+/* ---------- kleine Helfer ---------- */
+function hashStr(str){ let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+const pickFrom = (arr, seed) => arr[(seed === undefined ? Math.floor(Math.random() * arr.length) : seed % arr.length)];
+const fill = (tpl, v) => tpl.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+const fmtDate = ts => new Date(ts).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit', year:'2-digit'});
+const fmtAgo = iso => { const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000)); return s < 60 ? `vor ${s} s` : s < 3600 ? `vor ${Math.round(s/60)} min` : `vor ${Math.round(s/3600)} h`; };
+
+function toast(msg){
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role','status'); document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+/* ---------- Sprüche ---------- */
+const QUIPS = {
+  win: [
+    '{w} gewinnt. Die anderen tun so, als wäre es ihnen egal.',
+    '{w} holt sich den Sieg. Bitte keine Siegerrede.',
+    'Glückwunsch {w}. Nächstes Mal lasst ihr die anderen auch mal.',
+    '{w} ist heute nicht zu stoppen. Oder die anderen waren schlecht.',
+    'Der Tisch verneigt sich vor {w}.',
+  ],
+  last: [
+    '{l} sammelt fleißig Erfahrung.',
+    '{l}: Dabei sein ist alles. Wirklich alles.',
+    '{l} hat heute den anderen den Vortritt gelassen. Großzügig.',
+    'Für {l} gibt es nächstes Mal ein Handicap. Für die anderen.',
+    'Rückstand für {l}. Taktisch gewollt, heißt es.',
+  ],
+  tie: [ 'Gleichstand an der Spitze. Das schreit nach Revanche.' ],
+  wizardMiss: [
+    '{p} lag {n} daneben. Mutige Ansage.',
+    '{p} hat sich um {n} verschätzt. Die Karten lügen nicht, {p} schon.',
+    '{p}: {n} Stiche Abweichung. Hellsehen ist nicht jedem gegeben.',
+  ],
+  wizardAll: [ 'Alle haben getroffen. Verdächtig.', 'Keine einzige Fehlansage. Wer hat in die Karten geschaut?' ],
+  wizardNone: [ 'Niemand hat getroffen. Starke Runde, Leute.', 'Alle daneben. Das ist auch eine Leistung.' ],
+  bust: [ '{p} fliegt raus. Gier frisst Hirn.', '{p} wollte zu viel. Klassiker.', 'Tschüss Punkte, sagt {p}.', '{p} hätte aufhören sollen. Hat {p} aber nicht.' ],
+  flip7: [ 'FLIP 7 für {p}! Die anderen dürfen jetzt neidisch sein.', '{p} zieht sieben Verschiedene. Frechheit.' ],
+  kniffel: [ 'KNIFFEL für {p}! Würfeln kann {p}.', '{p} wirft fünf Gleiche. Der Tisch tobt.' ],
+  kniffelStrike: [ '{p} streicht den Kniffel. Autsch.', 'Kniffel gestrichen. {p} hat die Hoffnung aufgegeben.' ],
+  bonus: [ '{p} hat den Bonus sicher. +35.', 'Bonus für {p}. Oben ist erledigt.' ],
+  set: [ 'Satz für {p}.', '{p} holt den Satz. Weiter geht’s.' ],
+};
+function toastQuip(kind, v){ const arr = QUIPS[kind]; if (arr) toast(fill(pickFrom(arr), v)); }
+function quipFor(g){
+  const seed = hashStr(JSON.stringify([g.winners, g.losers, g.ranking.map(r => r.score)]));
+  if (g.winners.length > 1) return pickFrom(QUIPS.tie, seed);
+  if (g.losers.length && seed % 2) return fill(pickFrom(QUIPS.last, seed >>> 3), {l: g.losers.join(' & ')});
+  return fill(pickFrom(QUIPS.win, seed >>> 3), {w: g.winners.join(' & ')});
+}
+function quipWizardRound(r, players){
+  const misses = players.map(p => ({p, n: Math.abs(wBid(r, p) - r.tricks[p])})).filter(x => x.n > 0).sort((a,b) => b.n - a.n);
+  if (!misses.length) return toastQuip('wizardAll', {});
+  if (misses.length === players.length && players.length > 2) return toastQuip('wizardNone', {});
+  if (misses[0].n >= 2) toastQuip('wizardMiss', misses[0]);
+}
+
+/* ---------- Profile (optional) ---------- */
+const LS_PROFILES = 'spieleabend.profiles.v1';
+let profiles = load(LS_PROFILES, {});
+async function fetchProfiles(){
+  try {
+    const rows = await sb('/rest/v1/profiles?select=name,emoji,motto');
+    const map = {}; (rows || []).forEach(r => map[r.name] = {emoji: r.emoji || '', motto: r.motto || ''});
+    profiles = map; store(LS_PROFILES, profiles);
+  } catch(e) { /* Tabelle fehlt oder offline: Cache nutzen */ }
+}
+function profileOf(name){ return profiles[name] || null; }
+function avatar(name, big){
+  const p = profileOf(name);
+  const inner = p && p.emoji ? esc(p.emoji) : esc((name.trim()[0] || '?').toUpperCase());
+  return `<span class="ava ${big ? 'big' : ''} ${p && p.emoji ? 'emo' : ''}" aria-hidden="true">${inner}</span>`;
+}
+async function saveProfile(name, emoji, motto){
+  if (!pin) { toast('Zum Speichern von Profilen erst den Gruppen-PIN eingeben.'); return false; }
+  try {
+    await sb('/rest/v1/rpc/set_profile', {method:'POST', body: JSON.stringify({p_pin: pin, p_name: name, p_emoji: emoji, p_motto: motto})});
+    profiles[name] = {emoji, motto}; store(LS_PROFILES, profiles); toast('Profil gespeichert.'); return true;
+  } catch(e) {
+    toast(e.status === 404 ? 'Profile brauchen noch das Datenbank-Update (SQL).' : e.status ? 'Konnte Profil nicht speichern: ' + e.message : 'Keine Verbindung. Profil nicht gespeichert.');
+    return false;
+  }
+}
+
+/* ---------- Statistik ---------- */
+function participants(g){ return g.type === 'padel' ? g.ranking.flatMap(r => splitTeam(r.name)) : g.ranking.map(r => r.name); }
+function winnersOf(g){ return g.type === 'padel' ? g.winners.flatMap(splitTeam) : g.winners; }
+function losersOf(g){ return g.type === 'padel' ? g.losers.flatMap(splitTeam) : g.losers; }
+const chrono = list => [...list].sort((a,b) => a.ts - b.ts);
+
+function headToHead(list){
+  const m = {};
+  list.forEach(g => {
+    const pairs = [];
+    if (g.type === 'padel') { winnersOf(g).forEach(w => losersOf(g).forEach(l => pairs.push([w, l, 1]))); }
+    else { const r = g.ranking; for (let i = 0; i < r.length; i++) for (let j = i+1; j < r.length; j++) pairs.push([r[i].name, r[j].name, Math.sign(r[i].score - r[j].score)]); }
+    pairs.forEach(([x, y, res]) => {
+      const [a, b] = x < y ? [x, y] : [y, x];
+      const o = m[a + '|' + b] || (m[a + '|' + b] = {a, b, wa:0, wb:0, t:0});
+      if (res === 0) o.t++; else if ((res > 0 ? x : y) === a) o.wa++; else o.wb++;
+    });
+  });
+  return Object.values(m).map(o => ({...o, n: o.wa + o.wb + o.t}));
+}
+
+// Kennzahlen je Spieler über alle Spiele
+function playerStats(name, list){
+  const games = chrono(list.filter(g => participants(g).includes(name)));
+  const st = {name, played: games.length, wins:0, lasts:0, byType:{}, bestStreak:0, lastStreakMax:0, form:[],
+    kniffelMax:null, kniffel50:0, bonusCount:0, wizardBestRate:null, wizardMax:null, flipBestRound:0, flip7Count:0, bustCount:0, bustsOneGame:0, padelBagel:false};
+  let streak = 0, lstreak = 0;
+  games.forEach(g => {
+    const won = winnersOf(g).includes(name), last = losersOf(g).includes(name);
+    const bt = st.byType[g.type] || (st.byType[g.type] = {played:0, wins:0});
+    bt.played++; if (won) { bt.wins++; st.wins++; }
+    if (last) st.lasts++;
+    streak = won ? streak + 1 : 0; st.bestStreak = Math.max(st.bestStreak, streak);
+    lstreak = last ? lstreak + 1 : 0; st.lastStreakMax = Math.max(st.lastStreakMax, lstreak);
+    st.form.push(won ? 'S' : last ? 'L' : '·');
+    const myScore = (g.ranking.find(r => r.name === name) || {}).score;
+    const d = g.detail;
+    if (g.type === 'kniffel') {
+      if (myScore != null) st.kniffelMax = Math.max(st.kniffelMax ?? 0, myScore);
+      const sc = d && d.scores && d.scores[name];
+      if (sc) { if (sc.kn === 50) st.kniffel50++; if (kTotals(sc).bonus) st.bonusCount++; }
+    }
+    if (g.type === 'wizard') {
+      if (myScore != null) st.wizardMax = Math.max(st.wizardMax ?? -Infinity, myScore);
+      if (d && d.rounds && d.rounds.length >= 5) {
+        const hits = d.rounds.filter(r => r.bids[name] !== undefined && wBid(r, name) === r.tricks[name]).length;
+        st.wizardBestRate = Math.max(st.wizardBestRate ?? 0, hits / d.rounds.length);
+      }
+    }
+    if (g.type === 'flip7' && d && d.rounds) {
+      let busts = 0;
+      d.rounds.forEach(r => { const e = r[name]; if (!e) return; st.flipBestRound = Math.max(st.flipBestRound, f7Score(e)); if (e.bust) busts++; else if (e.nums.length >= 7) st.flip7Count++; });
+      st.bustCount += busts; st.bustsOneGame = Math.max(st.bustsOneGame, busts);
+    }
+    if (g.type === 'padel' && won && d && d.sets) {
+      const wi = d.winner; if (d.sets.some(s => s[wi] === 6 && s[1 - wi] === 0)) st.padelBagel = true;
+    }
+  });
+  st.form = st.form.slice(-10);
+  return st;
+}
+
+const ACHIEVEMENTS = [
+  {id:'first', t:'Erster Sieg', d:'Ein Spiel gewonnen', ok:s => s.wins >= 1},
+  {id:'hat', t:'Hattrick', d:'3 Siege in Folge', ok:s => s.bestStreak >= 3},
+  {id:'unstop', t:'Unaufhaltsam', d:'5 Siege in Folge', ok:s => s.bestStreak >= 5},
+  {id:'all', t:'Allrounder', d:'In 3 verschiedenen Spielen gewonnen', ok:s => Object.values(s.byType).filter(b => b.wins).length >= 3},
+  {id:'regular', t:'Stammgast', d:'25 Spiele gespielt', ok:s => s.played >= 25},
+  {id:'kn', t:'Kniffel!', d:'Einen Kniffel eingetragen', ok:s => s.kniffel50 >= 1},
+  {id:'k300', t:'Würfelgott', d:'300+ Punkte im Kniffel', ok:s => (s.kniffelMax ?? 0) >= 300},
+  {id:'bonus', t:'Bonusjäger', d:'5× den oberen Bonus', ok:s => s.bonusCount >= 5},
+  {id:'seer', t:'Hellseher', d:'80 % Treffer in einer Wizard-Partie', ok:s => (s.wizardBestRate ?? 0) >= 0.8},
+  {id:'f7', t:'Flip 7!', d:'Sieben verschiedene Zahlen', ok:s => s.flip7Count >= 1},
+  {id:'gambler', t:'Zocker', d:'3× raus in einer Flip-7-Partie', ok:s => s.bustsOneGame >= 3},
+  {id:'bagel', t:'Zu Null', d:'Padel-Satz 6:0 gewonnen', ok:s => s.padelBagel},
+  {id:'lantern', t:'Dauerabo hinten', d:'3× in Folge Letzter', ok:s => s.lastStreakMax >= 3},
+];
+
+function computeRecords(list){
+  const recs = [];
+  const games = chrono(list);
+  const add = (type, title, value, who, g) => { if (who && value !== null && value !== undefined && value !== -Infinity) recs.push({type, title, value, who, ts: g ? g.ts : null, id: g ? g.id : null}); };
+  // Allgemein: längste Siegesserie
+  const names = [...new Set(games.flatMap(participants))];
+  let bestS = {v:0, who:null};
+  names.forEach(n => { const s = playerStats(n, games).bestStreak; if (s > bestS.v) bestS = {v:s, who:n}; });
+  if (bestS.v >= 2) add('alle', 'Längste Siegesserie', `${bestS.v} Siege`, bestS.who, null);
+  // Bester Abend: meiste Siege an einem Tag
+  const perDay = {};
+  games.forEach(g => { const day = new Date(g.ts).toDateString(); winnersOf(g).forEach(w => { const k = day + '|' + w; perDay[k] = (perDay[k] || {n:0, w, ts:g.ts}); perDay[k].n++; }); });
+  const bd = Object.values(perDay).sort((a,b) => b.n - a.n)[0];
+  if (bd && bd.n >= 2) add('alle', 'Bester Abend', `${bd.n} Siege am ${fmtDate(bd.ts)}`, bd.w, null);
+  // Kniffel
+  let km = null; games.filter(g => g.type === 'kniffel').forEach(g => g.ranking.forEach(r => { if (!km || r.score > km.v) km = {v:r.score, who:r.name, g}; }));
+  if (km) add('kniffel', 'Höchste Kniffel-Punktzahl', `${km.v} Punkte`, km.who, km.g);
+  const knCount = {}; games.filter(g => g.type === 'kniffel' && g.detail && g.detail.scores).forEach(g => Object.entries(g.detail.scores).forEach(([n, sc]) => { if (sc.kn === 50) knCount[n] = (knCount[n] || 0) + 1; }));
+  const knTop = Object.entries(knCount).sort((a,b) => b[1] - a[1])[0];
+  if (knTop) add('kniffel', 'Meiste Kniffel', `${knTop[1]}×`, knTop[0], null);
+  // Wizard
+  let wm = null; games.filter(g => g.type === 'wizard').forEach(g => g.ranking.forEach(r => { if (!wm || r.score > wm.v) wm = {v:r.score, who:r.name, g}; }));
+  if (wm) add('wizard', 'Höchster Wizard-Endstand', `${wm.v} Punkte`, wm.who, wm.g);
+  let wr = null; games.filter(g => g.type === 'wizard' && g.detail && g.detail.rounds && g.detail.rounds.length >= 5).forEach(g => g.detail.players.forEach(n => {
+    const hits = g.detail.rounds.filter(r => r.bids[n] !== undefined && wBid(r, n) === r.tricks[n]).length, rate = hits / g.detail.rounds.length;
+    if (!wr || rate > wr.v) wr = {v:rate, who:n, g, hits, of:g.detail.rounds.length};
+  }));
+  if (wr) add('wizard', 'Beste Trefferquote', `${Math.round(wr.v*100)} % (${wr.hits}/${wr.of})`, wr.who, wr.g);
+  // Flip 7
+  let fr = null, f7c = {}, bc = {};
+  games.filter(g => g.type === 'flip7' && g.detail && g.detail.rounds).forEach(g => g.detail.rounds.forEach(r => Object.entries(r).forEach(([n, e]) => {
+    const sc = f7Score(e); if (!fr || sc > fr.v) fr = {v:sc, who:n, g};
+    if (e.bust) bc[n] = (bc[n] || 0) + 1; else if (e.nums.length >= 7) f7c[n] = (f7c[n] || 0) + 1;
+  })));
+  if (fr && fr.v > 0) add('flip7', 'Beste Flip-7-Runde', `${fr.v} Punkte`, fr.who, fr.g);
+  const f7Top = Object.entries(f7c).sort((a,b) => b[1] - a[1])[0]; if (f7Top) add('flip7', 'Meiste Flip 7', `${f7Top[1]}×`, f7Top[0], null);
+  const bTop = Object.entries(bc).sort((a,b) => b[1] - a[1])[0]; if (bTop) add('flip7', 'Pleitegeier (meiste Raus)', `${bTop[1]}×`, bTop[0], null);
+  let fq = null; games.filter(g => g.type === 'flip7' && g.detail && g.detail.rounds && g.ranking[0].score >= (g.detail.target || 200)).forEach(g => { const n = g.detail.rounds.length; if (!fq || n < fq.v) fq = {v:n, who:g.winners.join(' & '), g}; });
+  if (fq) add('flip7', 'Schnellster Flip-7-Sieg', `${fq.v} Runden`, fq.who, fq.g);
+  // Padel
+  let pd = null; games.filter(g => g.type === 'padel' && g.detail && g.detail.sets).forEach(g => {
+    const wi = g.detail.winner; if (wi === null || wi === undefined) return;
+    const diff = g.detail.sets.reduce((s, x) => s + x[wi] - x[1 - wi], 0);
+    if (!pd || diff > pd.v) pd = {v:diff, who:g.winners.join(' & '), g, sets:g.detail.sets.map(x => wi === 0 ? x.join(':') : [x[1], x[0]].join(':')).join(' ')};
+  });
+  if (pd) add('padel', 'Deutlichster Padel-Sieg', pd.sets, pd.who, pd.g);
+  return recs;
+}
+
+function renderRecordsBlock(list){
+  const recs = computeRecords(list).filter(r => boardFilter === 'alle' || r.type === boardFilter || r.type === 'alle');
+  if (!recs.length) return '';
+  return `<div><div class="label" style="margin-bottom:6px">Rekorde</div><div class="records">
+    ${recs.map(r => `<div class="rec ${r.id ? 'clickable-res' : ''}" ${r.id ? `data-act="game-detail" data-id="${esc(r.id)}" role="button" tabindex="0"` : ''}>
+      <span class="rec-t">${esc(r.title)}</span><span class="rec-v">${esc(r.value)}</span><span class="rec-w">${esc(r.who)}${r.ts ? ` · ${fmtDate(r.ts)}` : ''}</span></div>`).join('')}
+  </div></div>`;
+}
+function renderRivalsBlock(list){
+  const h = headToHead(list).filter(o => o.n >= 2).sort((a,b) => b.n - a.n || Math.abs(a.wa - a.wb) - Math.abs(b.wa - b.wb)).slice(0, 4);
+  if (!h.length) return '';
+  return `<div><div class="label" style="margin-bottom:6px">Rivalitäten · direkte Duelle</div><div class="rivals">
+    ${h.map(o => `<div class="rival">
+      <button class="name-link" data-act="profile" data-name="${esc(o.a)}">${avatar(o.a)}${esc(o.a)}</button>
+      <span class="rv-score"><b class="${o.wa > o.wb ? 'lead-s' : ''}">${o.wa}</b> : <b class="${o.wb > o.wa ? 'lead-s' : ''}">${o.wb}</b>${o.t ? `<small> · ${o.t} unent.</small>` : ''}</span>
+      <button class="name-link right" data-act="profile" data-name="${esc(o.b)}">${esc(o.b)}${avatar(o.b)}</button>
+    </div>`).join('')}
+  </div></div>`;
+}
+
+/* ---------- Sheet (Overlay) ---------- */
+const sheetEl = document.createElement('div');
+sheetEl.id = 'sheet'; sheetEl.hidden = true;
+sheetEl.innerHTML = `<div class="sheet-back" data-close></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="Extras"><button class="sheet-x" data-close aria-label="Schließen">×</button><div id="sheet-body"></div></div>`;
+document.body.appendChild(sheetEl);
+let sheetView = null, sheetThemeBefore = null;
+function openSheet(view){
+  if (sheetView && sheetView.cleanup) sheetView.cleanup();
+  sheetView = view; sheetEl.hidden = false; document.body.classList.add('sheet-open');
+  renderSheet();
+}
+function closeSheet(){
+  if (sheetView && sheetView.cleanup) sheetView.cleanup();
+  sheetView = null; sheetEl.hidden = true; document.body.classList.remove('sheet-open');
+  if (sheetThemeBefore) { document.documentElement.dataset.game = sheetThemeBefore; sheetThemeBefore = null; }
+}
+function setSheetTheme(type){
+  if (!sheetThemeBefore) sheetThemeBefore = document.documentElement.dataset.game;
+  document.documentElement.dataset.game = type || sheetThemeBefore;
+}
+function renderSheet(){
+  if (!sheetView) return;
+  const v = sheetView;
+  const fn = SHEETS[v.kind];
+  if (['live','game'].includes(v.kind)) {} else if (sheetThemeBefore) { document.documentElement.dataset.game = sheetThemeBefore; sheetThemeBefore = null; }
+  $('#sheet-body').innerHTML = fn ? fn(v) : '';
+  if (v.after) v.after();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetView) closeSheet(); });
+$('#extras-btn').addEventListener('click', () => openSheet({kind:'extras'}));
+
+const back = `<button class="btn ghost small sheet-back-btn" data-x="menu">← Extras</button>`;
+const currentRoster = () => (S.tab === 'flip7' ? S.flip7.players : S.players);
+
+const SHEETS = {
+  extras(){
+    return `<h2>Extras</h2>
+    <div class="tool-grid">
+      <button class="tool" data-x="open" data-k="starter"><b>Wer fängt an?</b><span>Alle Finger aufs Handy</span></button>
+      <button class="tool" data-x="open" data-k="dice"><b>Würfeln</b><span>1 bis 6 Würfel</span></button>
+      <button class="tool" data-x="open" data-k="coin"><b>Münze werfen</b><span>Kopf oder Zahl</span></button>
+      <button class="tool" data-x="open" data-k="teams"><b>Teams losen</b><span>Zufällig aufteilen</span></button>
+      <button class="tool" data-x="open" data-k="wheel"><b>Was spielen wir?</b><span>Das Spielrad entscheidet</span></button>
+      <button class="tool" data-x="open" data-k="me"><b>Profile</b><span>Emoji und Spruch, freiwillig</span></button>
+    </div>
+    <div class="settings">
+      <label class="toggle"><input type="checkbox" id="set-live" ${S.liveShare ? 'checked' : ''}> Meine Partie live teilen <small>${pin ? '' : '(braucht den Gruppen-PIN)'}</small></label>
+      <label class="toggle"><input type="checkbox" id="set-wake" ${S.wake ? 'checked' : ''}> Bildschirm bleibt während des Spiels an <small>${'wakeLock' in navigator ? '' : '(von diesem Browser nicht unterstützt)'}</small></label>
+    </div>`;
+  },
+
+  /* Wer fängt an */
+  starter(v){
+    v.after = () => setupFingers($('#finger-zone'));
+    const names = currentRoster();
+    return `${back}<h2>Wer fängt an?</h2>
+      <div id="finger-zone" class="finger-zone"><p id="finger-msg">Alle legen einen Finger aufs Display und halten still</p></div>
+      <div class="row between"><span class="label">Kein Touchscreen? Aus der Spielerliste losen:</span>
+      <button class="btn small" data-x="pick-name" ${names.length ? '' : 'disabled'}>Aus Spielern losen</button></div>
+      <div id="pick-result" class="pick-result" aria-live="polite">${v.picked ? `<b>${esc(v.picked)}</b> fängt an` : ''}</div>`;
+  },
+
+  dice(v){
+    v.n = v.n || 2; v.vals = v.vals || Array(v.n).fill(0);
+    return `${back}<h2>Würfeln</h2>
+      <div class="row"><span class="label">Anzahl</span>${[1,2,3,4,5,6].map(n => `<button class="chipbtn" data-x="dice-n" data-n="${n}" aria-pressed="${v.n === n}">${n}</button>`).join('')}</div>
+      <div class="dice-row" id="dice-row">${v.vals.map(val => dieHTML(val)).join('')}</div>
+      <div class="row between"><span class="dice-sum" id="dice-sum">${v.vals.some(x => x) ? 'Summe ' + v.vals.reduce((a,b) => a+b, 0) : 'Noch nicht gewürfelt'}</span>
+      <button class="btn solid" data-x="dice-roll">Würfeln</button></div>`;
+  },
+
+  coin(v){
+    return `${back}<h2>Münze werfen</h2>
+      <div class="coin-stage"><div class="coin ${v.flipping ? 'flip' : ''}" id="coin">${v.side ? (v.side === 'Kopf' ? 'K' : 'Z') : '?'}</div></div>
+      <div class="pick-result" aria-live="polite">${v.side && !v.flipping ? `<b>${v.side}</b>` : ''}</div>
+      <div class="row" style="justify-content:center"><button class="btn solid" data-x="coin-flip">Werfen</button></div>`;
+  },
+
+  teams(v){
+    const names = currentRoster();
+    v.k = v.k || 2;
+    return `${back}<h2>Teams losen</h2>
+      <div class="row"><span class="label">Teams</span>${[2,3,4].map(n => `<button class="chipbtn" data-x="teams-k" data-n="${n}" aria-pressed="${v.k === n}">${n}</button>`).join('')}
+      <span class="label">aus ${names.length} Spielern (${S.tab === 'flip7' ? 'Flip-7-Liste' : 'Spielerliste'})</span></div>
+      ${v.teams ? `<div class="teams">${v.teams.map((t,i) => `<div class="team"><span class="label">Team ${i+1}</span><b>${t.map(esc).join(' & ') || '–'}</b></div>`).join('')}</div>` : ''}
+      <div class="row between">
+        ${v.teams && v.k === 2 ? `<button class="btn small" data-x="teams-padel">Als Padel-Teams übernehmen</button>` : '<span></span>'}
+        <button class="btn solid" data-x="teams-go" ${names.length >= v.k ? '' : 'disabled'}>Losen</button>
+      </div>`;
+  },
+
+  wheel(v){
+    const opts = GAME_TYPES;
+    return `${back}<h2>Was spielen wir?</h2>
+      <div class="wheel">${opts.map(o => `<div class="wheel-item ${v.hi === o ? 'hi' : ''} ${v.done && v.hi === o ? 'won' : ''}">${TYPE_LABEL[o]}</div>`).join('')}</div>
+      <div class="row between">
+        ${v.done ? `<button class="btn solid" data-x="wheel-go" data-t="${v.hi}">Los: ${TYPE_LABEL[v.hi]}</button>` : '<span></span>'}
+        <button class="btn ${v.done ? '' : 'solid'}" data-x="wheel-spin" ${v.spinning ? 'disabled' : ''}>${v.done ? 'Nochmal drehen' : 'Drehen'}</button>
+      </div>`;
+  },
+
+  /* Profile-Übersicht */
+  me(){
+    const known = [...new Set([...S.players, ...S.flip7.players, ...history.flatMap(participants), ...Object.keys(profiles)])].sort((a,b) => a.localeCompare(b, 'de'));
+    return `${back}<h2>Profile</h2>
+      <p class="muted">Profile sind freiwillig. Mitspielen geht immer nur mit Namen. Mit Profil gibt es ein Emoji neben dem Namen und einen Spruch. Statistiken, Erfolge und Rivalitäten sieht jeder, auch ohne Profil.</p>
+      <div class="plist">${known.map(n => `<button class="pitem" data-x="profile" data-name="${esc(n)}">${avatar(n)}<span>${esc(n)}</span><small>${profileOf(n) ? 'Profil' : 'nur Name'}</small></button>`).join('') || '<span class="muted">Noch keine Spieler.</span>'}</div>`;
+  },
+
+  profile(v){
+    const name = v.name, p = profileOf(name) || {emoji:'', motto:''};
+    const st = playerStats(name, history);
+    const h2h = headToHead(history).filter(o => o.a === name || o.b === name).map(o => o.a === name ? {opp:o.b, me:o.wa, them:o.wb, t:o.t, n:o.n} : {opp:o.a, me:o.wb, them:o.wa, t:o.t, n:o.n}).sort((a,b) => b.n - a.n);
+    const myRecs = computeRecords(history).filter(r => r.who.split(' & ').includes(name));
+    const quote = st.played ? Math.round(100 * st.wins / st.played) : 0;
+    if (v.edit) {
+      const EMOJIS = ['🦊','🐻','🐼','🦁','🐯','🐸','🐙','🦄','🐺','🦉','🐧','🐢','🔥','⚡','🌵','🍕','🎩','👑','🎯','🚀','🍀','💎','🥨','🐉'];
+      return `<button class="btn ghost small sheet-back-btn" data-x="profile-view">← Zurück</button><h2>${esc(name)} · Profil</h2>
+        <form class="stack" data-xform="profile" style="gap:12px">
+          <div><div class="label" style="margin-bottom:6px">Emoji</div>
+            <div class="emoji-grid">${EMOJIS.map(e => `<button type="button" class="emo-btn" data-x="emo" data-e="${e}" aria-pressed="${(v.emoji ?? p.emoji) === e}">${e}</button>`).join('')}
+            <input id="emo-custom" maxlength="4" placeholder="eigenes" value="${esc(EMOJIS.includes(v.emoji ?? p.emoji) ? '' : (v.emoji ?? p.emoji))}" aria-label="Eigenes Emoji"></div></div>
+          <label><div class="label" style="margin-bottom:6px">Spruch (optional)</div><input id="motto" class="text-in" maxlength="80" value="${esc(v.motto ?? p.motto)}" placeholder="z. B. Ich würfle nicht, ich treffe."></label>
+          <div class="row between"><span class="label">${pin ? 'Wird für alle gespeichert' : 'Braucht den Gruppen-PIN (Bestenliste)'}</span><button class="btn solid" ${pin ? '' : 'disabled'}>Speichern</button></div>
+        </form>`;
+    }
+    const typeRows = GAME_TYPES.filter(t => st.byType[t]).map(t => { const b = st.byType[t]; return `<div class="kv"><span>${TYPE_LABEL[t]}</span><span class="mono">${b.wins} / ${b.played} · ${Math.round(100*b.wins/b.played)} %</span></div>`; }).join('');
+    return `${back}
+      <div class="prof-head">${avatar(name, true)}<div><h2>${esc(name)}</h2>${p.motto ? `<div class="motto">„${esc(p.motto)}“</div>` : `<div class="muted">Kein Profil angelegt</div>`}</div></div>
+      <div class="row"><button class="btn small" data-x="profile-edit">${profileOf(name) ? 'Profil bearbeiten' : 'Profil anlegen (optional)'}</button></div>
+      <div class="kpis"><div><b>${st.played}</b><span>Spiele</span></div><div><b>${st.wins}</b><span>Siege</span></div><div><b>${quote} %</b><span>Quote</span></div><div><b>${st.bestStreak}</b><span>Beste Serie</span></div></div>
+      ${st.form.length ? `<div><div class="label">Form · letzte ${st.form.length}</div><div class="form">${st.form.map(f => `<span class="f-${f === 'S' ? 'w' : f === 'L' ? 'l' : 'm'}" title="${f === 'S' ? 'Sieg' : f === 'L' ? 'Letzter' : 'Mittelfeld'}">${f}</span>`).join('')}</div></div>` : ''}
+      ${typeRows ? `<div><div class="label">Siege je Spiel</div>${typeRows}</div>` : ''}
+      <div><div class="label">Erfolge · ${ACHIEVEMENTS.filter(a => a.ok(st)).length} von ${ACHIEVEMENTS.length}</div>
+        <div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${a.ok(st) ? 'on' : ''}"><b>${a.t}</b><span>${a.d}</span></div>`).join('')}</div></div>
+      ${myRecs.length ? `<div><div class="label">Hält Rekorde</div>${myRecs.map(r => `<div class="kv"><span>${esc(r.title)}</span><span class="mono">${esc(r.value)}</span></div>`).join('')}</div>` : ''}
+      ${h2h.length ? `<div><div class="label">Direkte Duelle</div>${h2h.map(o => `<div class="kv"><button class="name-link" data-x="profile" data-name="${esc(o.opp)}">${avatar(o.opp)}gegen ${esc(o.opp)}</button><span class="mono"><b>${o.me}</b> : ${o.them}${o.t ? ` · ${o.t} unent.` : ''}</span></div>`).join('')}</div>` : ''}
+      ${!st.played ? `<p class="muted">Noch keine gespeicherten Spiele mit ${esc(name)}.</p>` : ''}`;
+  },
+
+  /* Live zuschauen */
+  live(v){
+    const row = liveGames.find(r => r.id === v.id);
+    if (!row) { setSheetTheme(null); return `<h2>Live</h2><p class="muted">Diese Partie läuft nicht mehr.</p>`; }
+    setSheetTheme(row.type);
+    return `<div class="live-head"><span class="live-dot"></span><b>LIVE · ${TYPE_LABEL[row.type]}</b><span class="label">aktualisiert ${fmtAgo(row.updated_at)}</span></div>
+      ${viewGame('live', row.type, row.state)}`;
+  },
+
+  /* Verlauf: alte Partie */
+  game(v){
+    const g = history.find(x => x.id === v.id);
+    if (!g) return `<h2>Spiel</h2><p class="muted">Nicht gefunden.</p>`;
+    setSheetTheme(g.type);
+    const d = g.detail;
+    let body = '<p class="muted">Für dieses Spiel gibt es nur das Ergebnis. Rundendetails werden erst ab diesem Update gespeichert.</p>';
+    if (d) {
+      const st = g.type === 'kniffel' ? {players:d.players, kniffel:{scores:d.scores, example:false, saved:null}}
+        : g.type === 'wizard' ? {wizard:{players:d.players, rounds:d.rounds, cur:d.rounds.length, draft:{bids:{},tricks:{}}, saved:null}}
+        : g.type === 'flip7' ? {flip7:{players:d.players, rounds:d.rounds, cur:d.rounds.length, draft:{}, target:d.target || 200, saved:null}}
+        : {padel:{teams:d.teams, sets:d.sets, pts:[0,0], golden:false, undo:[], done:d.winner ?? null, saved:null, serve:0}};
+      body = viewGame('history', g.type, st);
+    }
+    return `<div class="label">${TYPE_LABEL[g.type]} · ${fmtDate(g.ts)} ${new Date(g.ts).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</div>
+      <h2>${esc(g.winners.join(' & '))} gewinnt</h2>
+      <div class="muted">${g.ranking.map((r,i) => `${i+1}. ${esc(r.name)} (${r.score})`).join(' · ')}</div>
+      <div class="quip">„${esc(quipFor(g))}“</div>
+      ${body}`;
+  },
+};
+
+// Spielstand fremder Daten nur ansehen: Zustand kurz tauschen, rendern, zurücktauschen
+function viewGame(mode, type, state){
+  const keep = {players:S.players, kniffel:S.kniffel, wizard:S.wizard, flip7:S.flip7, padel:S.padel, tab:S.tab};
+  const ep = editingPlayers;
+  viewMode = mode; editingPlayers = false;
+  try {
+    Object.keys(state || {}).forEach(k => { if (k in keep) S[k] = state[k]; });
+    S.tab = type;
+    const html = ({kniffel:renderKniffel, wizard:renderWizard, flip7:renderFlip, padel:renderPadel})[type]();
+    return `<div class="ro" data-mode="${mode}" inert>${html}</div>`;
+  } catch(e) {
+    return `<p class="muted">Anzeige nicht möglich.</p>`;
+  } finally {
+    Object.assign(S, keep); viewMode = null; editingPlayers = ep;
+  }
+}
+
+/* Würfel */
+function dieHTML(val){
+  const P = {1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]}[val] || [];
+  return `<div class="die" aria-label="${val ? 'Würfel ' + val : 'Würfel'}">${Array.from({length:9}, (_,i) => `<i class="${P.includes(i+1) ? 'on' : ''}"></i>`).join('')}</div>`;
+}
+
+/* Finger-Auswahl */
+function setupFingers(zone){
+  if (!zone) return;
+  const colors = ['#e0352b','#1c80c4','#1f9a55','#c99700','#6d48d6','#cc3a8c','#10948d','#e8772e','#3a5bd8','#b8323f'];
+  const touches = new Map(); let timer = null, done = false, used = 0;
+  const msg = t => { const m = $('#finger-msg'); if (m) m.textContent = t; };
+  const place = (t) => { t.el.style.left = t.x + 'px'; t.el.style.top = t.y + 'px'; };
+  const pos = e => { const r = zone.getBoundingClientRect(); return {x: e.clientX - r.left, y: e.clientY - r.top}; };
+  const arm = () => {
+    clearTimeout(timer); if (done) return;
+    if (touches.size >= 2) { msg('Stillhalten …'); timer = setTimeout(pick, 1800); }
+    else msg(touches.size ? 'Noch mehr Finger!' : 'Alle legen einen Finger aufs Display und halten still');
+  };
+  const pick = () => {
+    const ids = [...touches.keys()], w = ids[Math.floor(Math.random() * ids.length)];
+    done = true;
+    touches.forEach((t, id) => t.el.classList.add(id === w ? 'win' : 'lose'));
+    navigator.vibrate && navigator.vibrate(90);
+    msg('Du fängst an!');
+  };
+  zone.addEventListener('pointerdown', e => {
+    if (done) return;
+    e.preventDefault();
+    try { zone.setPointerCapture(e.pointerId); } catch(_) {}
+    const el = document.createElement('div'); el.className = 'fdot'; el.style.setProperty('--c', colors[used++ % colors.length]);
+    zone.appendChild(el);
+    const t = {...pos(e), el}; touches.set(e.pointerId, t); place(t); arm();
+  });
+  zone.addEventListener('pointermove', e => { const t = touches.get(e.pointerId); if (!t || done) return; Object.assign(t, pos(e)); place(t); });
+  const up = e => {
+    const t = touches.get(e.pointerId); if (!t) return;
+    touches.delete(e.pointerId);
+    if (done) {
+      if (!t.el.classList.contains('win')) t.el.remove();
+      if (!touches.size) setTimeout(() => { zone.querySelectorAll('.fdot').forEach(d => d.remove()); done = false; used = 0; arm(); }, 1600);
+      return;
+    }
+    t.el.remove(); arm();
+  };
+  zone.addEventListener('pointerup', up); zone.addEventListener('pointercancel', up);
+  sheetView.cleanup = () => clearTimeout(timer);
+}
+
+/* Aktionen im Sheet */
+sheetEl.addEventListener('click', e => {
+  if (e.target.closest('[data-close]')) { closeSheet(); return; }
+  const el = e.target.closest('[data-x]'); if (!el) return;
+  const x = el.dataset.x, v = sheetView;
+  if (x === 'menu') return openSheet({kind:'extras'});
+  if (x === 'open') return openSheet({kind: el.dataset.k});
+  if (x === 'pick-name') {
+    const names = currentRoster(); if (!names.length) return;
+    let i = 0, n = 14 + Math.floor(Math.random() * names.length);
+    const out = $('#pick-result');
+    const tick = () => { out.innerHTML = `<b>${esc(names[i % names.length])}</b>`; if (i++ < n) setTimeout(tick, 60 + i * 12); else { v.picked = names[(i-1) % names.length]; out.innerHTML = `<b>${esc(v.picked)}</b> fängt an`; } };
+    tick(); return;
+  }
+  if (x === 'dice-n') { v.n = +el.dataset.n; v.vals = Array(v.n).fill(0); renderSheet(); return; }
+  if (x === 'dice-roll') {
+    let k = 0; const row = $('#dice-row'), sum = $('#dice-sum');
+    const roll = () => Array.from({length:v.n}, () => 1 + Math.floor(Math.random() * 6));
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const step = () => {
+      v.vals = roll(); row.innerHTML = v.vals.map(dieHTML).join(''); row.classList.add('shake');
+      if (!reduce && k++ < 7) setTimeout(step, 70);
+      else { row.classList.remove('shake'); sum.textContent = 'Summe ' + v.vals.reduce((a,b) => a+b, 0); }
+    };
+    step(); return;
+  }
+  if (x === 'coin-flip') {
+    v.flipping = true; v.side = null; renderSheet();
+    setTimeout(() => { v.flipping = false; v.side = Math.random() < .5 ? 'Kopf' : 'Zahl'; renderSheet(); }, 900);
+    return;
+  }
+  if (x === 'teams-k') { v.k = +el.dataset.n; v.teams = null; renderSheet(); return; }
+  if (x === 'teams-go') {
+    const names = [...currentRoster()];
+    for (let i = names.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [names[i], names[j]] = [names[j], names[i]]; }
+    v.teams = Array.from({length:v.k}, () => []); names.forEach((n, i) => v.teams[i % v.k].push(n)); renderSheet(); return;
+  }
+  if (x === 'teams-padel') {
+    S.padel.teams = v.teams.map(t => t.join(' & ')); save(); toast('Padel-Teams übernommen.'); return;
+  }
+  if (x === 'wheel-spin') {
+    const opts = GAME_TYPES; v.done = false; v.spinning = true;
+    const target = Math.floor(Math.random() * opts.length), total = opts.length * 4 + target;
+    let i = 0;
+    const tick = () => { v.hi = opts[i % opts.length]; renderSheet(); if (i++ < total) setTimeout(tick, 40 + Math.pow(i / total, 3) * 380); else { v.done = true; v.spinning = false; renderSheet(); } };
+    tick(); return;
+  }
+  if (x === 'wheel-go') { S.tab = el.dataset.t; save(); closeSheet(); render(); return; }
+  if (x === 'profile') return openSheet({kind:'profile', name: el.dataset.name});
+  if (x === 'profile-edit') { v.edit = true; renderSheet(); return; }
+  if (x === 'profile-view') { v.edit = false; v.emoji = undefined; v.motto = undefined; renderSheet(); return; }
+  if (x === 'emo') { v.motto = $('#motto').value; v.emoji = el.dataset.e; renderSheet(); return; }
+});
+sheetEl.addEventListener('change', e => {
+  if (e.target.id === 'set-live') { S.liveShare = e.target.checked; save(); if (!S.liveShare) liveClear(); else liveSchedule(); }
+  if (e.target.id === 'set-wake') { S.wake = e.target.checked; save(); updateWake(); }
+});
+sheetEl.addEventListener('submit', async e => {
+  if (!e.target.matches('[data-xform="profile"]')) return;
+  e.preventDefault();
+  const v = sheetView, custom = $('#emo-custom').value.trim();
+  const emoji = custom || v.emoji || (profileOf(v.name) || {}).emoji || '';
+  const motto = $('#motto').value.trim();
+  if (await saveProfile(v.name, emoji, motto)) { v.edit = false; v.emoji = undefined; v.motto = undefined; renderSheet(); if (S.tab === 'board') render(); }
+});
+// Tastatur für "Rollen-Buttons" (Verlauf, Rekorde)
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role="button"][data-act]')) { e.preventDefault(); e.target.click(); } });
+
+/* ---------- Live teilen & zuschauen ---------- */
+let liveTimer = null, liveActive = false, liveType = GAME_TYPES.includes(S.tab) ? S.tab : null, liveLastJson = '';
+function inProgress(type){
+  if (type === 'kniffel') { const K = S.kniffel; return !K.example && !K.saved && S.players.some(p => Object.keys(K.scores[p] || {}).length); }
+  if (type === 'wizard') { const W = S.wizard; return !W.saved && (W.rounds.length > 0 || Object.keys(W.draft.bids || {}).length > 0); }
+  if (type === 'flip7') { const F = S.flip7; return !F.saved && (F.rounds.length > 0 || Object.keys(F.draft || {}).length > 0); }
+  if (type === 'padel') { const P = S.padel; return !P.saved && (P.pts[0] + P.pts[1] > 0 || P.sets.some(s => s[0] + s[1] > 0)); }
+  return false;
+}
+function liveStateOf(type){
+  if (type === 'kniffel') return {players:S.players, kniffel:S.kniffel};
+  if (type === 'wizard') return {wizard:S.wizard};
+  if (type === 'flip7') return {flip7:S.flip7};
+  return {padel:{...S.padel, undo:[]}};
+}
+function liveSchedule(){
+  if (GAME_TYPES.includes(S.tab)) liveType = S.tab;
+  clearTimeout(liveTimer); liveTimer = setTimeout(livePush, 1200);
+}
+async function livePush(){
+  if (!pin || !S.liveShare || !liveType) return;
+  if (!inProgress(liveType)) { if (liveActive) liveClear(); return; }
+  const body = JSON.stringify({p_pin: pin, p_id: DEVICE_ID, p_type: liveType, p_state: liveStateOf(liveType)});
+  if (body === liveLastJson) return;
+  try { await sb('/rest/v1/rpc/set_live', {method:'POST', body}); liveActive = true; liveLastJson = body; } catch(e) {}
+}
+async function liveClear(){
+  liveActive = false; liveLastJson = '';
+  if (!pin) return;
+  try { await sb('/rest/v1/rpc/clear_live', {method:'POST', body: JSON.stringify({p_pin: pin, p_id: DEVICE_ID})}); } catch(e) {}
+}
+let liveGames = [];
+async function livePoll(){
+  try {
+    const since = new Date(Date.now() - 3 * 3600e3).toISOString();
+    const rows = await sb(`/rest/v1/live_games?select=*&updated_at=gte.${encodeURIComponent(since)}&order=updated_at.desc`);
+    liveGames = (rows || []).filter(r => r.id !== DEVICE_ID);
+  } catch(e) { liveGames = []; }
+  renderLiveBar();
+  if (sheetView && sheetView.kind === 'live') renderSheet();
+}
+function renderLiveBar(){
+  const bar = $('#livebar'); if (!bar) return;
+  if (!liveGames.length) { bar.hidden = true; bar.innerHTML = ''; return; }
+  bar.hidden = false;
+  bar.innerHTML = liveGames.map(r => {
+    const st = r.state || {};
+    const who = r.type === 'kniffel' ? st.players : r.type === 'padel' ? (st.padel ? st.padel.teams : []) : ((st[r.type] || {}).players || []);
+    return `<button class="live-pill" data-live="${esc(r.id)}"><span class="live-dot"></span><b>LIVE ${TYPE_LABEL[r.type] || r.type}</b><span class="lp-who">${esc((who || []).join(', '))}</span><span class="lp-go">Zuschauen</span></button>`;
+  }).join('');
+}
+$('#livebar').addEventListener('click', e => { const b = e.target.closest('[data-live]'); if (b) openSheet({kind:'live', id:b.dataset.live}); });
+setInterval(() => { if (document.visibilityState === 'visible') livePoll(); }, 8000);
+setTimeout(livePoll, 600);
+
+/* ---------- Bildschirm bleibt an ---------- */
+let wakeLock = null;
+async function updateWake(){
+  const want = S.wake && document.visibilityState === 'visible' && GAME_TYPES.includes(S.tab);
+  try {
+    if (want && !wakeLock && 'wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!want && wakeLock) { const w = wakeLock; wakeLock = null; await w.release(); }
+  } catch(e) { wakeLock = null; }
+}
+document.addEventListener('visibilitychange', updateWake);
+document.addEventListener('pointerdown', () => { if (!wakeLock) updateWake(); }, {passive:true});
+
+/* ---------- Export: Bestenliste als Bild ---------- */
+async function exportBoard(){
+  const list = history.filter(g => boardFilter === 'alle' || g.type === boardFilter);
+  const rows = boardRows(list).slice(0, 12);
+  if (!rows.length) return;
+  try { await document.fonts.ready; } catch(e) {}
+  const W = 1080, rowH = 86, top = 250, H = top + rows.length * rowH + 120;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const ink = '#151514', muted = '#6c6c66', paper = '#fbfbf8', mark = '#c7361f';
+  x.fillStyle = paper; x.fillRect(0, 0, W, H);
+  x.fillStyle = ink; x.fillRect(60, 196, W - 120, 5);
+  x.font = '900 104px "Big Shoulders Display", Impact, "Arial Narrow", sans-serif'; x.textBaseline = 'alphabetic';
+  x.fillText('SPIELEABEND', 60, 150);
+  x.font = '600 26px "JetBrains Mono", ui-monospace, monospace'; x.fillStyle = muted;
+  x.fillText(`BESTENLISTE · ${boardFilter === 'alle' ? 'ALLE SPIELE' : TYPE_LABEL[boardFilter].toUpperCase()} · ${new Date().toLocaleDateString('de-DE')}`, 62, 186);
+  x.font = '600 22px "JetBrains Mono", monospace';
+  x.fillText('SIEGE', 690, top - 12); x.fillText('SPIELE', 810, top - 12); x.fillText('QUOTE', 940, top - 12);
+  rows.forEach((r, i) => {
+    const y = top + i * rowH;
+    x.fillStyle = i % 2 ? paper : '#f1f1ec'; x.fillRect(60, y, W - 120, rowH);
+    x.fillStyle = i === 0 ? mark : ink; x.font = '900 52px "Big Shoulders Display", Impact, sans-serif'; x.fillText(String(i + 1), 80, y + 62);
+    const p = profileOf(r.name); x.fillStyle = ink; x.font = '600 38px "Instrument Sans", system-ui, sans-serif';
+    x.fillText(((p && p.emoji) ? p.emoji + ' ' : '') + r.name, 160, y + 56);
+    x.font = '700 36px "JetBrains Mono", monospace';
+    const q = Math.round(100 * r.wins / r.played);
+    x.fillText(String(r.wins), 700, y + 56); x.fillText(String(r.played), 830, y + 56); x.fillText(q + '%', 930, y + 56);
+    x.fillStyle = '#dcdcd5'; x.fillRect(160, y + 70, 480, 5); x.fillStyle = ink; x.fillRect(160, y + 70, 480 * q / 100, 5);
+  });
+  x.fillStyle = muted; x.font = '500 24px "JetBrains Mono", monospace';
+  x.fillText(location.host + location.pathname.replace(/index\.html$/, ''), 62, H - 50);
+  const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+  const file = new File([blob], 'spieleabend-bestenliste.png', {type:'image/png'});
+  try {
+    if (navigator.canShare && navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:'Spieleabend Bestenliste'}); return; }
+  } catch(e) { if (e && e.name === 'AbortError') return; }
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'spieleabend-bestenliste.png'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  toast('Bild gespeichert.');
+}
 
 render();
 setSync();

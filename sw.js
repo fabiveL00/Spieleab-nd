@@ -1,5 +1,5 @@
 // Spieleabend – Offline-Cache
-const CACHE = 'spieleabend-v7';
+const CACHE = 'spieleabend-v8';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
