@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbfbf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Spieleabend">
+<meta name="description" content="Zählblock für Kniffel, Wizard und Padel mit Bestenliste.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Spieleabend Zählblock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+:root{
+  --paper:#fbfbf8; --card:#ffffff; --ink:#151514; --muted:#6c6c66; --rule:#dcdcd5; --rule-strong:#151514;
+  --mark:#c7361f; --soft:#f1f1ec; --focus:#151514;
+  --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111110; --card:#191918; --ink:#eeeeea; --muted:#9b9b94; --rule:#2f2f2c; --rule-strong:#eeeeea;
+    --mark:#ff6d55; --soft:#20201e; --focus:#eeeeea;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111110; --card:#191918; --ink:#eeeeea; --muted:#9b9b94; --rule:#2f2f2c; --rule-strong:#eeeeea;
+  --mark:#ff6d55; --soft:#20201e; --focus:#eeeeea;
+}
+*{box-sizing:border-box}
+html,body{background:var(--paper)}
+body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:12px 64px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:6px 10px;border-bottom:3px solid var(--rule-strong)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,8vw,48px);line-height:.9;margin:0;letter-spacing:.01em;text-transform:uppercase}
+h1 small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:6px}
+.sync{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);margin-bottom:16px}
+nav.tabs button{background:none;border:0;padding:12px 4px 10px;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+h2{font-family:var(--display);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:0;line-height:1}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+.btn{border:1.5px solid var(--ink);background:var(--card);padding:9px 14px;border-radius:4px;font-weight:600;font-size:14px;line-height:1.1}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.ghost{border-color:var(--rule);background:transparent}
+.btn.warn{border-color:var(--mark);color:var(--mark)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.small{padding:6px 10px;font-size:13px}
+
+.players{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:var(--card);border-radius:999px;padding:5px 6px 5px 12px;font-weight:500}
+.chip button{border:0;background:var(--soft);width:22px;height:22px;border-radius:50%;line-height:1;font-size:14px;color:var(--muted)}
+.add{display:flex;gap:6px}
+.add input{border:1px solid var(--rule);background:var(--card);border-radius:999px;padding:6px 12px;width:140px}
+
+.note{border:1px dashed var(--rule);padding:10px 12px;border-radius:4px;font-size:13.5px;color:var(--muted)}
+.note b{color:var(--ink)}
+
+/* Kniffel block */
+.sheet{overflow-x:auto;border:1.5px solid var(--rule-strong);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--rule);border-left:1px solid var(--rule);padding:0;text-align:center;height:38px}
+th:first-child,td:first-child{border-left:0;text-align:left;padding-inline:10px;position:sticky;left:0;background:var(--card);z-index:1;min-width:104px;white-space:nowrap}
+thead th{font-family:var(--display);font-weight:800;font-size:17px;text-transform:uppercase;letter-spacing:.03em;height:42px;border-bottom:1.5px solid var(--rule-strong);padding-inline:4px;min-width:54px}
+td.cat{font-weight:500}
+td.cat span{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:400;letter-spacing:.03em;margin-top:-2px}
+tr.sum td{font-family:var(--mono);font-weight:700;background:var(--soft)}
+tr.sum td:first-child{font-family:var(--body);background:var(--soft);text-transform:uppercase;font-size:12px;letter-spacing:.08em}
+tr.total td{font-family:var(--mono);font-weight:700;font-size:18px;height:48px;border-top:1.5px solid var(--rule-strong);border-bottom:0}
+tr.total td:first-child{font-family:var(--display);font-weight:800;font-size:19px;text-transform:uppercase}
+tr.gap td{height:6px;background:var(--soft);border-bottom:1.5px solid var(--rule-strong)}
+td select{appearance:none;-webkit-appearance:none;border:0;background:transparent;width:100%;height:38px;text-align:center;text-align-last:center;font-family:var(--mono);font-size:16px;font-weight:600;cursor:pointer;padding:0 4px}
+td select.empty{color:var(--muted);font-weight:400}
+td select option{color:#151514;background:#fff}
+.lead{position:relative;display:inline-block;padding:2px 8px}
+.lead::after{content:"";position:absolute;inset:-3px -2px;border:2px solid var(--mark);border-radius:50% 45% 52% 48%;transform:rotate(-4deg)}
+.bonus-hint{font-family:var(--mono);font-size:10px;color:var(--muted);display:block;font-weight:400}
+
+/* Wizard */
+.round{border:1.5px solid var(--rule-strong);background:var(--card);padding:14px;border-radius:4px}
+.round-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:6px}
+.round-head .big{font-family:var(--display);font-weight:900;font-size:40px;line-height:.85}
+.round-head .big small{font-size:20px;color:var(--muted);font-weight:700}
+.wz-grid{display:grid;grid-template-columns:1fr auto auto;gap:4px 14px;align-items:center}
+.wz-grid .h{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+.wz-grid .h:first-child{text-align:left}
+.wz-name{font-weight:600;padding-block:6px;display:flex;align-items:center;gap:8px;min-width:0}
+.wz-name .dealer{font-family:var(--mono);font-size:10px;border:1px solid var(--rule);border-radius:3px;padding:1px 4px;color:var(--muted);font-weight:400}
+.step{display:flex;align-items:center;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.step button{width:36px;height:36px;border:0;background:var(--soft);font-size:18px;font-weight:600}
+.step output{width:34px;text-align:center;font-family:var(--mono);font-weight:700;font-size:17px}
+.step.unset output{color:var(--muted);font-weight:400}
+.checks{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px;display:flex;flex-direction:column;gap:3px}
+.checks .bad{color:var(--mark)}
+.pts{font-family:var(--mono);font-size:11px}
+.neg{color:var(--mark)}
+td.wz small{display:block;font-size:10px;color:var(--muted);font-family:var(--mono);line-height:1}
+td.wz{font-family:var(--mono);font-weight:600;padding-inline:4px}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:var(--soft)}
+tr.current td{outline:1.5px solid var(--ink);outline-offset:-2px}
+
+/* Padel */
+.court{border:1.5px solid var(--rule-strong);background:var(--card);border-radius:4px;overflow:hidden}
+.team-row{display:grid;grid-template-columns:1fr repeat(3,40px) 78px;align-items:center;border-bottom:1px solid var(--rule);min-height:64px}
+.team-row:last-child{border-bottom:0}
+.team-row input{border:0;background:transparent;font-weight:700;font-size:17px;padding:0 12px;width:100%;min-width:0}
+.team-row .set{font-family:var(--mono);font-size:22px;font-weight:600;text-align:center;color:var(--muted)}
+.team-row .set.won{color:var(--ink);font-weight:700}
+.team-row .game{font-family:var(--display);font-weight:900;font-size:40px;text-align:center;background:var(--ink);color:var(--paper);height:100%;display:flex;align-items:center;justify-content:center;line-height:1}
+.team-row .game.adv{font-size:19px;letter-spacing:.04em}
+.team-row.serve input{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+.court-head{display:grid;grid-template-columns:1fr repeat(3,40px) 78px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--rule);padding-block:6px}
+.court-head span{text-align:center}
+.court-head span:first-child{text-align:left;padding-left:12px}
+.point-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.point-btns button{border:1.5px solid var(--ink);background:var(--card);border-radius:4px;padding:22px 8px;font-family:var(--display);font-weight:800;font-size:22px;text-transform:uppercase;letter-spacing:.03em;line-height:1.05;overflow-wrap:anywhere}
+.point-btns button:active{background:var(--ink);color:var(--paper)}
+.status{font-family:var(--display);font-weight:800;font-size:22px;text-transform:uppercase;letter-spacing:.03em;text-align:center}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--ink)}
+
+/* Bestenliste */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{border:1px solid var(--rule);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.board{border:1.5px solid var(--rule-strong);background:var(--card)}
+.board-row{display:grid;grid-template-columns:34px 1fr 54px 54px 64px;align-items:center;border-bottom:1px solid var(--rule);padding-block:10px;font-variant-numeric:tabular-nums}
+.board-row:last-child{border-bottom:0}
+.board-row.head{padding-block:7px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.board-row > *{text-align:center}
+.board-row > :nth-child(2){text-align:left}
+.board-row .rank{font-family:var(--display);font-weight:900;font-size:24px}
+.board-row .who{font-weight:600;display:flex;gap:6px;flex-wrap:wrap;align-items:baseline}
+.badge{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid currentColor;border-radius:3px;padding:1px 5px}
+.badge.mark{color:var(--mark)}
+.badge.dim{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.bar{height:4px;background:var(--soft);margin-top:4px;border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink)}
+.log{display:flex;flex-direction:column}
+.log-item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding-block:10px;border-bottom:1px solid var(--rule)}
+.log-item .type{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:16px;width:64px}
+.log-item .res{font-size:13.5px;min-width:0}
+.log-item .res b{font-weight:700}
+.log-item .when{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.x{border:0;background:none;color:var(--muted);font-size:18px;width:32px;height:32px}
+.empty-state{padding:28px 16px;text-align:center;color:var(--muted)}
+.empty-state b{display:block;font-family:var(--display);font-size:24px;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+
+.winner{border:1.5px solid var(--mark);border-radius:4px;padding:14px;text-align:center;background:var(--card)}
+.winner .t{font-family:var(--display);font-weight:900;font-size:30px;text-transform:uppercase;line-height:1}
+.winner .s{color:var(--muted);font-size:13.5px;margin-top:4px}
+
+.pinbox{border:1.5px solid var(--ink);border-radius:4px;padding:12px;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;background:var(--card)}
+.pinbox b{display:block}
+.pinbox span{display:block;font-size:13px;color:var(--muted);max-width:40ch}
+.pinbox input{border:1px solid var(--rule);background:var(--paper);border-radius:4px;padding:7px 10px;width:110px;font-family:var(--mono)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+@media (max-width:420px){
+  nav.tabs button{font-size:16px}
+  .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
+  .board-row{grid-template-columns:28px 1fr 44px 44px 54px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;overscroll-behavior-y:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <h1>Spieleabend<small>Zählblock · Kniffel · Wizard · Padel</small></h1>
+    <span class="sync" id="sync">auf diesem Gerät gespeichert</span>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="kniffel" id="tab-kniffel">Kniffel</button>
+    <button role="tab" data-tab="wizard" id="tab-wizard">Wizard</button>
+    <button role="tab" data-tab="padel" id="tab-padel">Padel</button>
+    <button role="tab" data-tab="board" id="tab-board">Bestenliste</button>
+  </nav>
+  <main id="app"></main>
+</div>
+<canvas id="confetti" hidden></canvas>
+
+<script>
+(() => {
+const LS_KEY = 'spieleabend.v1', LS_HIST = 'spieleabend.history.v1';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/* ---------- Kniffel-Definition ---------- */
+const UPPER = [['Einser',1],['Zweier',2],['Dreier',3],['Vierer',4],['Fünfer',5],['Sechser',6]];
+const LOWER = [
+  {k:'dp', n:'Dreierpasch', h:'alle Augen', range:true},
+  {k:'vp', n:'Viererpasch', h:'alle Augen', range:true},
+  {k:'fh', n:'Full House', h:'25 Punkte', fix:25},
+  {k:'ks', n:'Kleine Straße', h:'30 Punkte', fix:30},
+  {k:'gs', n:'Große Straße', h:'40 Punkte', fix:40},
+  {k:'kn', n:'Kniffel', h:'50 Punkte', fix:50},
+  {k:'ch', n:'Chance', h:'alle Augen', range:true},
+];
+const ALL_K = [...UPPER.map((u,i) => 'u'+(i+1)), ...LOWER.map(l => l.k)];
+
+function exampleKniffel(players){
+  const ex = [
+    {u1:3,u2:6,u3:9,u4:12,dp:24,fh:25,ks:30},
+    {u1:2,u2:8,u3:9,u5:15,u6:24,kn:50,ch:22},
+    {u1:4,u3:12,u4:8,dp:19,gs:40},
+    {u2:4,u3:6,u4:16,u5:20,vp:23,fh:0},
+  ];
+  const scores = {};
+  players.forEach((p, i) => scores[p] = {...(ex[i] || {})});
+  return {scores, example:true, saved:false};
+}
+
+/* ---------- Zustand ---------- */
+const defaultPlayers = ['Anna','Ben','Chris','Dana'];
+function freshWizard(players){ return {players:[...players], rounds:[], cur:0, draft:{bids:{},tricks:{}}, saved:false}; }
+function freshPadel(){ return {teams:['Anna & Ben','Chris & Dana'], sets:[[0,0]], pts:[0,0], golden:false, undo:[], done:null, saved:false, serve:0}; }
+let S;
+try { S = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) { S = null; }
+if (!S || !S.players) {
+  S = { tab:'kniffel', players:[...defaultPlayers], kniffel:null, wizard:null, padel:null };
+}
+if (!S.kniffel) S.kniffel = exampleKniffel(S.players);
+if (!S.wizard) S.wizard = freshWizard(S.players);
+if (!S.padel) S.padel = freshPadel();
+let boardFilter = 'alle';
+let editingPlayers = false;
+function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {} }
+
+/* ---------- Verlauf: Supabase + Offline-Warteschlange ---------- */
+const SB_URL = 'https://rqdihhpmdlvqnqvowxkx.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxZGloaHBtZGx2cW5xdm93eGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTM2OTYsImV4cCI6MjEwNTM4OTY5Nn0.gDw0pgBsFuMlN2Y05Qy_-kvJ7KzGJQoEsuHA4kp4gZg';
+const LS_REMOTE = 'spieleabend.remote.v1', LS_PENDING = 'spieleabend.pending.v1', LS_PIN = 'spieleabend.pin';
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch(e) { return d; } };
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
+
+let remote = load(LS_REMOTE, []);     // letzter Stand vom Server (für offline)
+let pending = load(LS_PENDING, []);   // noch nicht hochgeladene Spiele
+let pin = load(LS_PIN, '');
+let online = null;                    // null = unbekannt, true/false nach letztem Versuch
+let pinError = '';
+// Spiele aus der Version ohne Server übernehmen
+const legacy = load(LS_HIST, null);
+if (Array.isArray(legacy) && legacy.length) {
+  legacy.forEach(g => { if (!pending.some(p => p.id === g.id)) pending.push(g); });
+  store(LS_PENDING, pending); try { localStorage.removeItem(LS_HIST); } catch(e) {}
+}
+let history = [];
+function rebuildHistory(){
+  const ids = new Set(remote.map(g => g.id));
+  history = [...pending.filter(g => !ids.has(g.id)).map(g => ({...g, _pending:true})), ...remote]
+    .sort((a,b) => b.ts - a.ts);
+}
+rebuildHistory();
+
+function setSync(){
+  const el = $('#sync'); if (!el) return;
+  const n = pending.length;
+  el.textContent = !pin ? (n ? `PIN fehlt · ${n} wartet` : 'PIN fehlt')
+    : online === false ? (n ? `offline · ${n} wartet` : 'offline')
+    : n ? `${n} wird gesendet…` : online ? 'synchronisiert' : 'verbinde…';
+}
+
+async function sb(path, opts = {}){
+  const res = await fetch(SB_URL + path, {
+    ...opts,
+    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+  });
+  const text = await res.text();
+  let body = null; try { body = text ? JSON.parse(text) : null; } catch(e) { body = text; }
+  if (!res.ok) { const err = new Error((body && body.message) || res.statusText); err.status = res.status; err.body = body; throw err; }
+  return body;
+}
+const isPinError = e => e && (e.body && e.body.code === '28000' || /PIN/i.test(e.message || ''));
+
+async function fetchRemote(){
+  try {
+    const rows = await sb('/rest/v1/games?select=id,ts,type,ranking,winners,losers&order=ts.desc&limit=1000');
+    remote = rows; store(LS_REMOTE, remote); online = true;
+  } catch(e) { if (!e.status) online = false; }
+}
+let flushing = false;
+async function flush(){
+  if (flushing || !pin || !pending.length) return;
+  flushing = true;
+  try {
+    for (const g of [...pending]) {
+      const game = {id:g.id, ts:g.ts, type:g.type, ranking:g.ranking, winners:g.winners, losers:g.losers};
+      await sb('/rest/v1/rpc/add_game', { method:'POST', body: JSON.stringify({p_pin:pin, p_game:game}) });
+      pending = pending.filter(p => p.id !== g.id); store(LS_PENDING, pending);
+      if (!remote.some(r => r.id === game.id)) remote.unshift(game);
+      online = true;
+    }
+  } catch(e) {
+    if (isPinError(e)) { pin = ''; store(LS_PIN, ''); pinError = 'Der gespeicherte PIN stimmt nicht mehr. Bitte neu eingeben.'; }
+    else if (!e.status) online = false;
+  }
+  flushing = false;
+}
+async function sync(){
+  await flush(); await fetchRemote(); rebuildHistory(); setSync();
+  if (S.tab === 'board') render();
+}
+async function recordGame(g){
+  g.id = uid(); g.ts = Date.now();
+  pending.push(g); store(LS_PENDING, pending); rebuildHistory(); setSync();
+  sync();
+}
+async function deleteGame(id){
+  if (pending.some(p => p.id === id)) {
+    pending = pending.filter(p => p.id !== id); store(LS_PENDING, pending);
+  } else {
+    if (!pin) { pinError = 'Zum Löschen bitte erst den Gruppen-PIN eingeben.'; render(); return; }
+    try {
+      await sb('/rest/v1/rpc/delete_game', { method:'POST', body: JSON.stringify({p_pin:pin, p_id:id}) });
+      remote = remote.filter(r => r.id !== id); store(LS_REMOTE, remote); online = true;
+    } catch(e) {
+      if (isPinError(e)) { pin = ''; store(LS_PIN, ''); pinError = 'PIN falsch, Spiel wurde nicht gelöscht.'; }
+      else { pinError = 'Keine Verbindung, Löschen hat nicht geklappt.'; online = false; }
+    }
+  }
+  rebuildHistory(); setSync(); render();
+}
+async function submitPin(value){
+  pinError = '';
+  try {
+    const ok = await sb('/rest/v1/rpc/check_pin', { method:'POST', body: JSON.stringify({p_pin:value}) });
+    online = true;
+    if (ok === true) { pin = value; store(LS_PIN, pin); await sync(); }
+    else pinError = 'Falscher PIN.';
+  } catch(e) { pinError = e.status ? 'Server-Fehler: ' + e.message : 'Keine Verbindung. PIN kann nur online geprüft werden.'; if (!e.status) online = false; }
+  setSync(); render();
+}
+window.addEventListener('online', sync);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sync(); });
+setInterval(() => { if (document.visibilityState === 'visible' && S.tab === 'board') sync(); }, 20000);
+
+/* ---------- Konfetti ---------- */
+function confetti(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('#confetti'), ctx = c.getContext('2d');
+  c.hidden = false; c.width = innerWidth * devicePixelRatio; c.height = innerHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+  const mark = getComputedStyle(document.documentElement).getPropertyValue('--mark').trim();
+  const bits = Array.from({length:140}, () => ({
+    x: innerWidth/2 + (Math.random()-.5)*80, y: innerHeight*.35,
+    vx: (Math.random()-.5)*14, vy: -Math.random()*14-4, r: Math.random()*6+3,
+    a: Math.random()*6, va: (Math.random()-.5)*.4, c: Math.random() < .25 ? mark : ink, sq: Math.random() < .5
+  }));
+  let t = 0;
+  (function frame(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    bits.forEach(b => { b.vy += .35; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.a += b.va;
+      ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.a); ctx.fillStyle = b.c;
+      if (b.sq) ctx.fillRect(-b.r/2,-b.r/4,b.r,b.r/2); else { ctx.beginPath(); ctx.arc(0,0,b.r/3,0,7); ctx.fill(); }
+      ctx.restore(); });
+    if (++t < 150) requestAnimationFrame(frame); else { ctx.clearRect(0,0,innerWidth,innerHeight); c.hidden = true; }
+  })();
+}
+
+/* ---------- Spieler-Editor ---------- */
+function playersBlock(context){
+  if (!editingPlayers) {
+    return `<div class="row between">
+      <div class="players">${S.players.map(p => `<span class="chip" style="padding-right:12px">${esc(p)}</span>`).join('')}</div>
+      <button class="btn ghost small" data-act="edit-players">Spieler ändern</button>
+    </div>`;
+  }
+  return `<div class="stack" style="gap:8px">
+    <div class="players">
+      ${S.players.map((p,i) => `<span class="chip">${esc(p)}<button aria-label="${esc(p)} entfernen" data-act="rm-player" data-i="${i}">×</button></span>`).join('')}
+      <form class="add" data-form="add-player"><input id="new-player" placeholder="Name" maxlength="18" autocomplete="off"><button class="btn small">Hinzufügen</button></form>
+    </div>
+    <div class="row between">
+      <span class="label">${context === 'wizard' ? 'Wizard: 3–6 Spieler · Änderung startet neue Partie' : 'Neue Spieler bekommen eine leere Spalte'}</span>
+      <button class="btn solid small" data-act="done-players">Fertig</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- Kniffel ---------- */
+function kOptions(key){
+  if (key[0] === 'u') { const n = +key[1]; return [0, n, 2*n, 3*n, 4*n, 5*n]; }
+  const l = LOWER.find(x => x.k === key);
+  if (l.fix) return [0, l.fix];
+  return [0, ...Array.from({length:26}, (_,i) => i+5)];
+}
+function kTotals(sc){
+  sc = sc || {};
+  const up = UPPER.reduce((s,_,i) => s + (+sc['u'+(i+1)] || 0), 0);
+  const bonus = up >= 63 ? 35 : 0;
+  const low = LOWER.reduce((s,l) => s + (+sc[l.k] || 0), 0);
+  const filled = ALL_K.filter(k => sc[k] !== undefined && sc[k] !== '').length;
+  return {up, bonus, upTotal: up + bonus, low, total: up + bonus + low, filled};
+}
+function renderKniffel(){
+  const K = S.kniffel, ps = S.players;
+  const totals = ps.map(p => kTotals(K.scores[p]));
+  const max = Math.max(...totals.map(t => t.total));
+  const leadIdx = max > 0 ? totals.map((t,i) => t.total === max ? i : -1).filter(i => i >= 0) : [];
+  const allDone = ps.length > 0 && totals.every(t => t.filled === ALL_K.length);
+  const cell = (p, key) => {
+    const v = (K.scores[p] || {})[key];
+    const has = v !== undefined && v !== '';
+    return `<td><select data-k="${key}" data-p="${esc(p)}" aria-label="${esc(p)} ${key}" class="${has ? '' : 'empty'}">
+      <option value="" ${has ? '' : 'selected'}>·</option>
+      ${kOptions(key).map(o => `<option value="${o}" ${has && +v === o ? 'selected' : ''}>${o === 0 ? '0 ✗' : o}</option>`).join('')}
+    </select></td>`;
+  };
+  const head = `<tr><th>Kniffel</th>${ps.map(p => `<th>${esc(p)}</th>`).join('')}</tr>`;
+  const upper = UPPER.map(([n,v],i) => `<tr><td class="cat">${n}<span>nur ${v}er zählen</span></td>${ps.map(p => cell(p,'u'+(i+1))).join('')}</tr>`).join('');
+  const upSum = `<tr class="sum"><td>Summe oben</td>${totals.map(t => `<td>${t.up}</td>`).join('')}</tr>`;
+  const bonus = `<tr class="sum"><td>Bonus ab 63</td>${totals.map(t => `<td>${t.bonus ? '+35' : `<span class="bonus-hint">noch ${Math.max(0,63 - t.up)}</span>`}</td>`).join('')}</tr>`;
+  const lower = LOWER.map(l => `<tr><td class="cat">${l.n}<span>${l.h}</span></td>${ps.map(p => cell(p,l.k)).join('')}</tr>`).join('');
+  const lowSum = `<tr class="sum"><td>Summe unten</td>${totals.map(t => `<td>${t.low}</td>`).join('')}</tr>`;
+  const total = `<tr class="total"><td>Gesamt</td>${totals.map((t,i) => `<td>${leadIdx.includes(i) ? `<span class="lead">${t.total}</span>` : t.total}</td>`).join('')}</tr>`;
+
+  return `<div class="stack">
+    ${K.example ? `<div class="note"><b>Beispielrunde.</b> Die Werte sind nur zum Zeigen, wie der Block aussieht. „Neues Spiel“ leert ihn, „Spieler ändern“ setzt eure Namen.</div>` : ''}
+    ${playersBlock('kniffel')}
+    <div class="sheet"><table><thead>${head}</thead><tbody>${upper}${upSum}${bonus}<tr class="gap"><td colspan="${ps.length+1}"></td></tr>${lower}${lowSum}${total}</tbody></table></div>
+    <div class="row between">
+      <span class="label">${allDone ? 'Alle Felder voll' : `${totals.reduce((s,t)=>s+t.filled,0)} / ${ALL_K.length * ps.length} Felder`}</span>
+      <div class="row">
+        <button class="btn ghost" data-act="k-new">Neues Spiel</button>
+        <button class="btn solid" data-act="k-finish" ${K.example || K.saved || !ps.length || max === 0 ? 'disabled' : ''}>${K.saved ? 'Gespeichert ✓' : 'Spiel beenden'}</button>
+      </div>
+    </div>
+    ${K.saved ? winnerCard('kniffel', K.saved) : ''}
+  </div>`;
+}
+
+/* ---------- Wizard ---------- */
+function wScore(bid, tricks){ return bid === tricks ? 20 + 10*tricks : -10*Math.abs(bid - tricks); }
+function wTotals(W){
+  const t = {}; W.players.forEach(p => t[p] = 0);
+  W.rounds.forEach(r => W.players.forEach(p => t[p] += wScore(r.bids[p], r.tricks[p])));
+  return t;
+}
+function renderWizard(){
+  const W = S.wizard, ps = W.players, n = ps.length;
+  const maxRounds = n >= 3 && n <= 6 ? 60 / n : 0;
+  const tooFew = n < 3 || n > 6;
+  const finished = maxRounds && W.rounds.length >= maxRounds && W.cur >= maxRounds;
+  const roundNo = W.cur + 1;
+  const editing = W.cur < W.rounds.length;
+  const d = W.draft;
+  const totals = wTotals(W);
+  let body = '';
+
+  if (tooFew) {
+    body = `<div class="note"><b>Wizard braucht 3 bis 6 Spieler.</b> Ändere oben die Spielerliste.</div>`;
+  } else if (!finished) {
+    const dealer = ps[(roundNo - 1) % n];
+    const bidSum = ps.reduce((s,p) => s + (d.bids[p] ?? 0), 0);
+    const trickSum = ps.reduce((s,p) => s + (d.tricks[p] ?? 0), 0);
+    const allBids = ps.every(p => d.bids[p] !== undefined);
+    const allTricks = ps.every(p => d.tricks[p] !== undefined);
+    const ok = allBids && allTricks && trickSum === roundNo;
+    const stepper = (kind, p) => {
+      const v = d[kind][p];
+      return `<div class="step ${v === undefined ? 'unset' : ''}">
+        <button data-act="w-step" data-kind="${kind}" data-p="${esc(p)}" data-d="-1" aria-label="${kind === 'bids' ? 'Ansage' : 'Stiche'} ${esc(p)} weniger">−</button>
+        <output>${v === undefined ? '–' : v}</output>
+        <button data-act="w-step" data-kind="${kind}" data-p="${esc(p)}" data-d="1" aria-label="${kind === 'bids' ? 'Ansage' : 'Stiche'} ${esc(p)} mehr">+</button>
+      </div>`;
+    };
+    body = `<div class="round">
+      <div class="round-head">
+        <div><div class="label">${editing ? 'Runde korrigieren' : 'Aktuelle Runde'}</div><div class="big">${roundNo}<small> / ${maxRounds}</small></div></div>
+        <div class="label" style="text-align:right">${roundNo} ${roundNo === 1 ? 'Karte' : 'Karten'} pro Kopf<br>Geber: ${esc(dealer)}</div>
+      </div>
+      <div class="wz-grid">
+        <div class="h">Spieler</div><div class="h">Ansage</div><div class="h">Stiche</div>
+        ${ps.map(p => `<div class="wz-name">${esc(p)}${p === dealer ? '<span class="dealer">gibt</span>' : ''}</div>${stepper('bids',p)}${stepper('tricks',p)}`).join('')}
+      </div>
+      <div class="checks">
+        <span>Ansagen: ${allBids ? bidSum : '…'} bei ${roundNo} Stichen ${allBids ? (bidSum === roundNo ? '· geht exakt auf' : bidSum > roundNo ? `· ${bidSum - roundNo} zu viel angesagt` : `· ${roundNo - bidSum} zu wenig angesagt`) : ''}</span>
+        <span class="${allTricks && trickSum !== roundNo ? 'bad' : ''}">Stiche: ${trickSum} von ${roundNo}${allTricks && trickSum !== roundNo ? ' · passt nicht' : ''}</span>
+      </div>
+      <div class="row between" style="margin-top:12px">
+        ${editing ? `<button class="btn ghost small" data-act="w-back">Abbrechen</button>` : `<span></span>`}
+        <button class="btn solid" data-act="w-score" ${ok ? '' : 'disabled'}>${editing ? 'Korrektur speichern' : 'Runde werten'}</button>
+      </div>
+    </div>`;
+  }
+
+  let table = '';
+  if (!tooFew && W.rounds.length) {
+    const max = Math.max(...ps.map(p => totals[p]));
+    table = `<div class="sheet"><table>
+      <thead><tr><th>Runde</th>${ps.map(p => `<th>${esc(p)}</th>`).join('')}</tr></thead>
+      <tbody>
+      ${W.rounds.map((r,i) => {
+        const run = {}; ps.forEach(p => run[p] = 0);
+        for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += wScore(W.rounds[j].bids[p], W.rounds[j].tricks[p]));
+        return `<tr class="clickable ${W.cur === i ? 'current' : ''}" data-act="w-edit" data-i="${i}" title="Runde ${i+1} bearbeiten">
+          <td class="cat">Runde ${i+1}<span>antippen zum Korrigieren</span></td>
+          ${ps.map(p => { const s = wScore(r.bids[p], r.tricks[p]);
+            return `<td class="wz">${run[p]}<small class="${s < 0 ? 'neg' : ''}">${s > 0 ? '+' : ''}${s} · ${r.bids[p]}/${r.tricks[p]}</small></td>`; }).join('')}
+        </tr>`; }).join('')}
+      <tr class="total"><td>Stand</td>${ps.map(p => `<td>${totals[p] === max ? `<span class="lead">${totals[p]}</span>` : totals[p]}</td>`).join('')}</tr>
+      </tbody></table></div>
+      <span class="label">Klein: Rundenpunkte · Ansage/Stiche. Richtig: 20 + 10 je Stich. Daneben: −10 je Stich Abweichung.</span>`;
+  }
+
+  return `<div class="stack">
+    ${playersBlock('wizard')}
+    ${body}
+    ${finished && !W.saved ? `<div class="winner"><div class="t">Alle ${maxRounds} Runden gespielt</div><div class="s">Speichern, damit es in der Bestenliste landet.</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn solid" data-act="w-finish">Ergebnis speichern</button></div></div>` : ''}
+    ${W.saved ? winnerCard('wizard', W.saved) : ''}
+    ${table}
+    <div class="row between">
+      <span class="label">${maxRounds ? `${W.rounds.length} von ${maxRounds} Runden` : ''}</span>
+      <div class="row">
+        <button class="btn ghost" data-act="w-new">Neues Spiel</button>
+        ${!finished && W.rounds.length && !W.saved ? `<button class="btn" data-act="w-finish">Vorzeitig beenden</button>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Padel ---------- */
+function pDisplay(P){
+  const [a,b] = P.pts, g = P.sets[P.sets.length-1];
+  const tb = g[0] === 6 && g[1] === 6;
+  if (tb) return {labels:[String(a), String(b)], tb:true, adv:[false,false], info:'Tiebreak · bis 7, zwei Punkte Vorsprung'};
+  const L = ['0','15','30','40'];
+  if (a >= 3 && b >= 3) {
+    if (a === b) return {labels:['40','40'], adv:[false,false], info: P.golden ? 'Golden Point · nächster Punkt gewinnt' : 'Einstand'};
+    return a > b ? {labels:['Vorteil',''], adv:[true,false], info:'Vorteil'} : {labels:['','Vorteil'], adv:[false,true], info:'Vorteil'};
+  }
+  return {labels:[L[a], L[b]], adv:[false,false], info:''};
+}
+function setsWon(P){
+  const w = [0,0];
+  P.sets.forEach(([a,b]) => { if ((a >= 6 || b >= 6) && (Math.abs(a-b) >= 2 || a === 7 || b === 7)) w[a > b ? 0 : 1]++; });
+  return w;
+}
+function pPoint(t){
+  const P = S.padel; if (P.done !== null) return;
+  P.undo.push(JSON.stringify({sets:P.sets, pts:P.pts, serve:P.serve}));
+  if (P.undo.length > 200) P.undo.shift();
+  const o = 1 - t, g = P.sets[P.sets.length-1];
+  const tb = g[0] === 6 && g[1] === 6;
+  P.pts[t]++;
+  let gameWon = false;
+  if (tb) gameWon = P.pts[t] >= 7 && P.pts[t] - P.pts[o] >= 2;
+  else if (P.golden && P.pts[t] === 4 && P.pts[o] === 3) gameWon = true;
+  else gameWon = P.pts[t] >= 4 && P.pts[t] - P.pts[o] >= 2;
+  if (gameWon) {
+    g[t]++; P.pts = [0,0]; P.serve = 1 - P.serve;
+    const setDone = (g[t] >= 6 && g[t] - g[o] >= 2) || g[t] === 7;
+    if (setDone) {
+      const w = setsWon(P);
+      if (w[t] === 2) { P.done = t; }
+      else P.sets.push([0,0]);
+    }
+  }
+  save(); render();
+  if (P.done !== null) confetti();
+}
+function renderPadel(){
+  const P = S.padel, D = pDisplay(P), w = setsWon(P);
+  const setCell = (i, t) => {
+    const s = P.sets[i]; if (!s) return `<div class="set"></div>`;
+    const complete = i < P.sets.length - 1 || P.done !== null;
+    return `<div class="set ${complete && s[t] > s[1-t] ? 'won' : ''}">${s[t]}</div>`;
+  };
+  const teamRow = t => `<div class="team-row ${P.serve === t && P.done === null ? 'serve' : ''}">
+    <input id="team-${t}" data-team="${t}" value="${esc(P.teams[t])}" aria-label="Name Team ${t+1}" maxlength="30">
+    ${setCell(0,t)}${setCell(1,t)}${setCell(2,t)}
+    <div class="game ${D.adv[t] ? 'adv' : ''}">${P.done !== null ? (P.done === t ? '✓' : '') : esc(D.labels[t])}</div>
+  </div>`;
+  const status = P.done !== null
+    ? ''
+    : `<div class="status">${D.info || `Satz ${P.sets.length} · ${w[0]}:${w[1]} Sätze`}</div>`;
+  return `<div class="stack">
+    <div class="court">
+      <div class="court-head"><span>Team · unterstrichen schlägt auf</span><span>S1</span><span>S2</span><span>S3</span><span>Spiel</span></div>
+      ${teamRow(0)}${teamRow(1)}
+    </div>
+    ${status}
+    ${P.done === null ? `<div class="point-btns">
+      <button data-act="p-point" data-t="0">Punkt<br>${esc(P.teams[0])}</button>
+      <button data-act="p-point" data-t="1">Punkt<br>${esc(P.teams[1])}</button>
+    </div>` : ''}
+    ${P.done !== null && !P.saved ? `<div class="winner"><div class="t">${esc(P.teams[P.done])} gewinnt</div><div class="s">${P.sets.map(s => s.join(':')).join('  ·  ')}</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn solid" data-act="p-finish">Ergebnis speichern</button></div></div>` : ''}
+    ${P.saved ? winnerCard('padel', P.saved) : ''}
+    <div class="row between">
+      <label class="toggle"><input type="checkbox" id="golden" ${P.golden ? 'checked' : ''}> Golden Point statt Vorteil</label>
+      <div class="row">
+        <button class="btn ghost" data-act="p-undo" ${P.undo.length ? '' : 'disabled'}>↶ Rückgängig</button>
+        <button class="btn ghost" data-act="p-new">Neues Match</button>
+      </div>
+    </div>
+    <span class="label">Best of 3 · Tiebreak bei 6:6 · Namen mit „&“ trennen, dann zählt der Sieg für beide in der Bestenliste</span>
+  </div>`;
+}
+
+/* ---------- Gewinner & Titel ---------- */
+const TITLES = { kniffel:'Würfelgott', wizard:'Stich-Orakel', padel:'Herrscher der Glaswand' };
+const LOSER = { kniffel:'Pechwürfel', wizard:'Falschansager', padel:'Netzroller' };
+function winnerCard(type, g){
+  return `<div class="winner"><div class="label">${TITLES[type]}</div><div class="t">${esc(g.winners.join(' & '))}</div>
+    <div class="s">${g.ranking.map((r,i) => `${i+1}. ${esc(r.name)} (${r.score})`).join(' · ')}</div>
+    <div class="s">${esc(LOSER[type])}: <b>${esc(g.losers.join(' & '))}</b> · gespeichert in der Bestenliste</div></div>`;
+}
+function buildResult(type, ranking){
+  ranking.sort((a,b) => b.score - a.score);
+  const top = ranking[0].score, bottom = ranking[ranking.length-1].score;
+  return { type, ranking,
+    winners: ranking.filter(r => r.score === top).map(r => r.name),
+    losers: ranking.filter(r => r.score === bottom && bottom !== top).map(r => r.name) };
+}
+function splitTeam(name){ return name.split(/\s*(?:&|\+|\/|,|\bund\b)\s*/i).map(s => s.trim()).filter(Boolean); }
+
+/* ---------- Bestenliste ---------- */
+function renderBoard(){
+  const list = history.filter(g => boardFilter === 'alle' || g.type === boardFilter);
+  const stats = {};
+  list.forEach(g => {
+    const names = g.type === 'padel' ? g.ranking.flatMap(r => splitTeam(r.name)) : g.ranking.map(r => r.name);
+    const wins = g.type === 'padel' ? g.winners.flatMap(splitTeam) : g.winners;
+    const loses = g.type === 'padel' ? g.losers.flatMap(splitTeam) : g.losers;
+    names.forEach(n => { stats[n] = stats[n] || {name:n, played:0, wins:0, last:0}; stats[n].played++; });
+    wins.forEach(n => stats[n] && stats[n].wins++);
+    loses.forEach(n => stats[n] && stats[n].last++);
+  });
+  const rows = Object.values(stats).sort((a,b) => b.wins - a.wins || (b.wins/b.played) - (a.wins/a.played) || a.last - b.last);
+  const maxLast = Math.max(0, ...rows.map(r => r.last));
+  const filterBtn = (k, l) => `<button data-act="filter" data-f="${k}" aria-pressed="${boardFilter === k}">${l}</button>`;
+  const fmt = ts => new Date(ts).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'}) + ' ' + new Date(ts).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+  return `<div class="stack">
+    ${!pin ? `<form class="pinbox" data-form="pin">
+      <div><b>Gruppen-PIN eingeben</b><span>Damit landen eure Spiele in der gemeinsamen Bestenliste. Lesen geht auch ohne.</span></div>
+      <div class="row"><input id="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN" aria-label="Gruppen-PIN"><button class="btn solid small">Verbinden</button></div>
+    </form>` : ''}
+    ${pinError ? `<div class="note" style="color:var(--mark);border-color:var(--mark)">${esc(pinError)}</div>` : ''}
+    <div class="row between"><h2>Ewige Tabelle</h2><div class="filters">${filterBtn('alle','Alle')}${filterBtn('kniffel','Kniffel')}${filterBtn('wizard','Wizard')}${filterBtn('padel','Padel')}</div></div>
+    ${rows.length ? `<div class="board">
+      <div class="board-row head"><span>#</span><span>Spieler</span><span>Siege</span><span>Spiele</span><span>Quote</span></div>
+      ${rows.map((r,i) => { const q = Math.round(100 * r.wins / r.played);
+        return `<div class="board-row">
+          <span class="rank">${i+1}</span>
+          <span><span class="who">${esc(r.name)}${i === 0 && r.wins > 0 ? ' <span class="badge mark">Seriensieger</span>' : ''}${r.last === maxLast && maxLast > 0 ? ' <span class="badge dim">Rote Laterne</span>' : ''}</span><div class="bar"><i style="width:${q}%"></i></div></span>
+          <span class="mono">${r.wins}</span><span class="mono">${r.played}</span><span class="mono">${q}%</span>
+        </div>`; }).join('')}
+    </div>` : `<div class="board"><div class="empty-state"><b>Noch keine Spiele</b>Beendet eine Partie Kniffel, Wizard oder Padel, dann taucht hier auf, wer den Abend dominiert.</div></div>`}
+    ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele</div><div class="log">
+      ${list.slice(0,30).map(g => `<div class="log-item">
+        <span class="type">${g.type}</span>
+        <span class="res"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}</span></span>
+        <button class="x" data-act="del-game" data-id="${esc(g.id)}" aria-label="Spiel löschen" title="Spiel löschen">×</button>
+      </div>`).join('')}
+    </div></div>` : ''}
+    <span class="label">Rote Laterne = am häufigsten Letzter. Bei Padel zählt jedes Teammitglied einzeln.</span>
+    ${pin ? `<div class="row"><button class="btn ghost small" data-act="pin-reset">PIN auf diesem Gerät vergessen</button></div>` : ''}
+  </div>`;
+}
+
+/* ---------- Render & Events ---------- */
+function render(){
+  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === S.tab));
+  const app = $('#app');
+  app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : renderBoard();
+}
+
+document.querySelector('nav.tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  S.tab = b.dataset.tab; editingPlayers = false; save(); render();
+});
+
+function applyPlayers(){
+  const ps = S.players;
+  // Kniffel: Spalten anpassen, vorhandene Werte behalten
+  const K = S.kniffel;
+  if (K.example) { S.kniffel = {scores:{}, example:false, saved:false}; }
+  ps.forEach(p => { S.kniffel.scores[p] = S.kniffel.scores[p] || {}; });
+  // Wizard: bei geänderter Besetzung neue Partie
+  if (JSON.stringify(S.wizard.players) !== JSON.stringify(ps)) S.wizard = freshWizard(ps);
+}
+
+const app = $('#app');
+app.addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act;
+  if (a === 'edit-players') { editingPlayers = true; render(); setTimeout(() => $('#new-player')?.focus(), 0); return; }
+  if (a === 'done-players') { editingPlayers = false; applyPlayers(); save(); render(); return; }
+  if (a === 'rm-player') { S.players.splice(+el.dataset.i, 1); save(); render(); return; }
+
+  if (a === 'k-new') { S.kniffel = {scores:{}, example:false, saved:false}; S.players.forEach(p => S.kniffel.scores[p] = {}); save(); render(); return; }
+  if (a === 'k-finish') {
+    const res = buildResult('kniffel', S.players.map(p => ({name:p, score:kTotals(S.kniffel.scores[p]).total})));
+    S.kniffel.saved = res; save(); render(); confetti(); await recordGame({...res}); return;
+  }
+
+  const W = S.wizard;
+  if (a === 'w-step') {
+    const {kind, p} = el.dataset, dd = +el.dataset.d, max = W.cur + 1;
+    const v = W.draft[kind][p];
+    let nv = v === undefined ? (dd > 0 ? 0 : 0) : v + dd;
+    if (v === undefined && dd > 0) nv = 0;
+    nv = Math.max(0, Math.min(max, nv));
+    W.draft[kind][p] = nv; save(); render(); return;
+  }
+  if (a === 'w-score') {
+    const r = {bids:{...W.draft.bids}, tricks:{...W.draft.tricks}};
+    if (W.cur < W.rounds.length) W.rounds[W.cur] = r; else W.rounds.push(r);
+    W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; W.saved = false; save(); render(); return;
+  }
+  if (a === 'w-edit') {
+    const i = +el.dataset.i; W.cur = i;
+    W.draft = {bids:{...W.rounds[i].bids}, tricks:{...W.rounds[i].tricks}}; save(); render();
+    $('.round')?.scrollIntoView({behavior:'smooth', block:'start'}); return;
+  }
+  if (a === 'w-back') { W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; save(); render(); return; }
+  if (a === 'w-new') { S.wizard = freshWizard(S.players); save(); render(); return; }
+  if (a === 'w-finish') {
+    const t = wTotals(W);
+    const res = buildResult('wizard', W.players.map(p => ({name:p, score:t[p]})));
+    W.saved = res; W.cur = W.rounds.length; save(); render(); confetti(); await recordGame({...res}); return;
+  }
+
+  const P = S.padel;
+  if (a === 'p-point') { pPoint(+el.dataset.t); return; }
+  if (a === 'p-undo') {
+    const last = P.undo.pop(); if (!last) return;
+    const o = JSON.parse(last); P.sets = o.sets; P.pts = o.pts; P.serve = o.serve; P.done = null; P.saved = false;
+    save(); render(); return;
+  }
+  if (a === 'p-new') { const teams = P.teams, golden = P.golden; S.padel = freshPadel(); S.padel.teams = teams; S.padel.golden = golden; save(); render(); return; }
+  if (a === 'p-finish') {
+    const w = setsWon(P);
+    const res = buildResult('padel', [{name:P.teams[0], score:w[0]}, {name:P.teams[1], score:w[1]}]);
+    P.saved = res; save(); render(); await recordGame({...res}); return;
+  }
+
+  if (a === 'filter') { boardFilter = el.dataset.f; render(); return; }
+  if (a === 'pin-reset') { pin = ''; store(LS_PIN, ''); pinError = ''; setSync(); render(); return; }
+  if (a === 'del-game') {
+    if (el.dataset.confirm) { deleteGame(el.dataset.id); }
+    else { el.dataset.confirm = '1'; el.textContent = 'Löschen?'; el.style.width = 'auto'; el.style.fontSize = '12px'; el.style.color = 'var(--mark)'; }
+    return;
+  }
+});
+
+app.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('select[data-k]')) {
+    const p = t.dataset.p, k = t.dataset.k;
+    if (S.kniffel.example) { S.kniffel = {scores:{}, example:false, saved:false}; S.players.forEach(pl => S.kniffel.scores[pl] = {}); }
+    S.kniffel.scores[p] = S.kniffel.scores[p] || {};
+    if (t.value === '') delete S.kniffel.scores[p][k]; else S.kniffel.scores[p][k] = +t.value;
+    S.kniffel.saved = false; save(); render(); return;
+  }
+  if (t.id === 'golden') { S.padel.golden = t.checked; save(); render(); return; }
+});
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.matches('input[data-team]')) {
+    S.padel.teams[+t.dataset.team] = t.value || `Team ${+t.dataset.team + 1}`; save();
+    const btn = document.querySelector(`[data-act="p-point"][data-t="${t.dataset.team}"]`);
+    if (btn) btn.innerHTML = 'Punkt<br>' + esc(S.padel.teams[+t.dataset.team]);
+  }
+});
+app.addEventListener('submit', e => {
+  if (e.target.matches('[data-form="pin"]')) {
+    e.preventDefault();
+    const v = $('#pin-input').value.trim(); if (v) submitPin(v);
+    return;
+  }
+  if (!e.target.matches('[data-form="add-player"]')) return;
+  e.preventDefault();
+  const inp = $('#new-player'), name = inp.value.trim();
+  if (name && !S.players.includes(name) && S.players.length < 8) { S.players.push(name); save(); render(); setTimeout(() => $('#new-player')?.focus(), 0); }
+  else inp.select();
+});
+
+render();
+setSync();
+sync();
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+
+</body>
+</html>

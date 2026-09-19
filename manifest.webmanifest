@@ -1,0 +1,17 @@
+{
+  "name": "Spieleabend Zählblock",
+  "short_name": "Spieleabend",
+  "description": "Zählblock für Kniffel, Wizard und Padel mit Bestenliste.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbfbf8",
+  "theme_color": "#151514",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
