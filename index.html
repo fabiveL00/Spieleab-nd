@@ -607,6 +607,36 @@ header.top .me-btn .ava.acc:not(.emo):not(.img){background:#fbfbf8;color:#151514
 :root[data-game="wizard"] .wz-mode .seg button[aria-pressed="true"]{background:var(--gold);color:#1a1433}
 :root[data-game="wizard"] .zero-badge{color:var(--gold)}
 
+/* ===== Roter Filz: Kniffel-Tisch und Würfelkästchen ===== */
+:root{
+  --felt-noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.75'/%3E%3C/svg%3E");
+}
+:root[data-game="kniffel"] body{
+  background-color:#7d1f21;
+  background-image:var(--felt-noise), radial-gradient(120% 80% at 50% -10%, #a33033 0%, #7d1f21 45%, #5d1517 100%);
+  background-size:140px 140px, cover;
+  background-blend-mode:overlay, normal;
+  background-attachment:fixed, fixed;
+}
+:root[data-game="kniffel"] .sheet{box-shadow:0 10px 28px #00000055, 3px 3px 0 #00000022;border-color:#2a1416}
+:root[data-game="kniffel"] .note{background:#fffdf6;border-color:#00000033;color:#4a4036}
+:root[data-game="kniffel"] .note b{color:#1b2847}
+:root[data-game="kniffel"] .chip{box-shadow:0 2px 6px #0003}
+:root[data-game="kniffel"] .label,:root[data-game="kniffel"] .players .label{color:#f3d9d5}
+:root[data-game="kniffel"] .btn.ghost{background:#fffdf6;border-color:#00000033}
+:root[data-game="kniffel"] .winner{box-shadow:0 10px 28px #00000055}
+
+/* Würfelkästchen: Filz-Tablett mit Rand */
+.dice-row{background-color:#7d1f21;background-image:var(--felt-noise),radial-gradient(90% 120% at 50% 0%,#a33033,#6b1a1c);
+  background-size:140px 140px,cover;background-blend-mode:overlay,normal;
+  border-radius:16px;padding:18px 14px;margin-block:4px;min-height:104px;align-items:center;
+  box-shadow:inset 0 3px 14px #00000066, inset 0 0 0 3px #4a1214, 0 2px 0 #ffffff22}
+.dice-row .die{background:#fffdf7;border-color:#2a1416;box-shadow:0 4px 10px #00000055}
+.dice-row .die i.on{background:#1b1b1a}
+.dice-row .die:nth-child(3n){transform:rotate(-3deg)}
+.dice-row .die:nth-child(3n+2){transform:rotate(2.5deg)}
+.dice-row.shake .die{transition:transform .07s ease}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
