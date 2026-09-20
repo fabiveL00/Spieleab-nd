@@ -595,6 +595,18 @@ header.top .me-btn .ava.acc:not(.emo):not(.img){background:#fbfbf8;color:#151514
 :root[data-game="padel"] .padel-mode button+button{border-left-color:#fff}
 :root[data-game="padel"] .x{color:#b7cbe6}
 
+/* Wizard: Spielmodus */
+.wz-mode{display:flex;flex-direction:column;gap:8px;border:1.5px dashed var(--rule-strong);border-radius:10px;padding:12px;background:var(--card)}
+.wz-mode .seg button{font-weight:700;padding:10px}
+.wz-mode-hint{font-size:13px;color:var(--muted)}
+.zero-badge{border:1px solid currentColor;border-radius:3px;padding:0 4px}
+:root[data-game="wizard"] .wz-mode{border-color:var(--gold)}
+:root[data-game="wizard"] .wz-mode .seg{border-color:var(--gold)}
+:root[data-game="wizard"] .wz-mode .seg button{background:transparent;color:var(--ink)}
+:root[data-game="wizard"] .wz-mode .seg button+button{border-left-color:var(--gold)}
+:root[data-game="wizard"] .wz-mode .seg button[aria-pressed="true"]{background:var(--gold);color:#1a1433}
+:root[data-game="wizard"] .zero-badge{color:var(--gold)}
+
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -657,7 +669,7 @@ function exampleKniffel(players){
 
 /* ---------- Zustand ---------- */
 const defaultPlayers = ['Anna','Ben','Chris','Dana'];
-function freshWizard(players){ return {players:[...players], rounds:[], cur:0, draft:{bids:{},tricks:{}}, saved:false}; }
+function freshWizard(players){ return {players:[...players], rounds:[], cur:0, draft:{bids:{},tricks:{}}, saved:false, zero: !!(typeof S !== 'undefined' && S && S.wizardZero)}; }
 function freshFlip(players){ return {players:[...players], rounds:[], cur:0, draft:{}, target:200, saved:false}; }
 function freshPadel(){ return {teams:['Anna & Ben','Chris & Dana'], sets:[[0,0]], pts:[0,0], golden:false, undo:[], done:null, saved:false, serve:0}; }
 let S;
@@ -893,10 +905,15 @@ function renderKniffel(){
 function wScore(bid, tricks){ return bid === tricks ? 20 + 10*tricks : -10*Math.abs(bid - tricks); }
 // Wolke (Jubiläumsausgabe): wer den Wolken-Stich gewinnt, ändert seine Ansage um +1 oder −1
 function wBid(r, p){ return r.bids[p] + (r.cloud && r.cloud.p === p ? (r.cloud.d || 0) : 0); }
-function wRoundScore(r, p){ return wScore(wBid(r, p), r.tricks[p]); }
+// Null-Risiko: effektive Ansage 0 (nach Wolke) → ±10 × Rundennummer
+function wRoundScore(r, p, roundNo, zero){
+  const b = wBid(r, p), t = r.tricks[p];
+  if (zero && b === 0 && roundNo) return t === 0 ? 10 * roundNo : -10 * roundNo;
+  return wScore(b, t);
+}
 function wTotals(W){
   const t = {}; W.players.forEach(p => t[p] = 0);
-  W.rounds.forEach(r => W.players.forEach(p => t[p] += wRoundScore(r, p)));
+  W.rounds.forEach((r, i) => W.players.forEach(p => t[p] += wRoundScore(r, p, i + 1, W.zero)));
   return t;
 }
 function renderWizard(){
@@ -910,6 +927,14 @@ function renderWizard(){
   const totals = wTotals(W);
   let body = '';
 
+  const modePick = !viewMode && !tooFew && W.rounds.length === 0 && !W.saved ? `<div class="wz-mode">
+      <span class="label">Spielmodus</span>
+      <div class="seg wide" role="group" aria-label="Spielmodus">
+        <button data-act="w-zero" data-v="0" aria-pressed="${!W.zero}">Normal</button>
+        <button data-act="w-zero" data-v="1" aria-pressed="${!!W.zero}">Null-Risiko</button>
+      </div>
+      <span class="wz-mode-hint">${W.zero ? '0 angesagt: 0 Stiche = +10 × Runde, sonst −10 × Runde. Wolke kann retten.' : '20 + 10 je Stich, daneben −10 je Stich.'}</span>
+    </div>` : '';
   if (tooFew) {
     body = `<div class="note"><b>Wizard braucht 3 bis 6 Spieler.</b> Ändere oben die Spielerliste.</div>`;
   } else if (!finished) {
@@ -931,7 +956,7 @@ function renderWizard(){
     };
     body = `<div class="round">
       <div class="round-head">
-        <div><div class="label">${editing ? 'Runde korrigieren' : 'Aktuelle Runde'}</div><div class="big">${roundNo}<small> / ${maxRounds}</small></div></div>
+        <div><div class="label">${editing ? 'Runde korrigieren' : 'Aktuelle Runde'}${W.zero && W.rounds.length ? ' · <span class="zero-badge">Null-Risiko</span>' : ''}</div><div class="big">${roundNo}<small> / ${maxRounds}</small></div></div>
         <div class="label" style="text-align:right">${roundNo} ${roundNo === 1 ? 'Karte' : 'Karten'} pro Kopf<br>Geber: ${esc(dealer)}</div>
       </div>
       <div class="wz-grid">
@@ -941,6 +966,7 @@ function renderWizard(){
       <div class="checks">
         <span>Ansagen: ${allBids ? bidSum : '…'} bei ${roundNo} Stichen ${allBids ? (bidSum === roundNo ? '· geht exakt auf' : bidSum > roundNo ? `· ${bidSum - roundNo} zu viel angesagt` : `· ${roundNo - bidSum} zu wenig angesagt`) : ''}</span>
         <span class="${allTricks && trickSum !== roundNo ? 'bad' : ''}">Stiche: ${trickSum} von ${roundNo}${allTricks && trickSum !== roundNo ? ' · passt nicht' : ''}</span>
+        ${W.zero ? `<span>Null-Risiko: 0 angesagt = ±${roundNo * 10}</span>` : ''}
       </div>
       <div class="cloud">
         <label for="w-cloud">☁ Wolke gewonnen von</label>
@@ -970,10 +996,10 @@ function renderWizard(){
       <tbody>
       ${W.rounds.map((r,i) => {
         const run = {}; ps.forEach(p => run[p] = 0);
-        for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += wRoundScore(W.rounds[j], p));
+        for (let j = 0; j <= i; j++) ps.forEach(p => run[p] += wRoundScore(W.rounds[j], p, j + 1, W.zero));
         return `<tr class="clickable ${W.cur === i ? 'current' : ''}" data-act="w-edit" data-i="${i}" title="Runde ${i+1} bearbeiten">
           <td class="cat">Runde ${i+1}</td>
-          ${ps.map(p => { const s = wRoundScore(r, p); const c = r.cloud && r.cloud.p === p;
+          ${ps.map(p => { const s = wRoundScore(r, p, i + 1, W.zero); const c = r.cloud && r.cloud.p === p;
             return `<td class="wz">${run[p]}<small class="${s < 0 ? 'neg' : ''}">${s > 0 ? '+' : ''}${s} · ${c ? '☁' + wBid(r,p) : r.bids[p]}/${r.tricks[p]}</small></td>`; }).join('')}
         </tr>`; }).join('')}
       <tr class="total"><td>Stand</td>${ps.map(p => `<td>${totals[p] === max ? `<span class="lead">${totals[p]}</span>` : totals[p]}</td>`).join('')}</tr>
@@ -983,6 +1009,7 @@ function renderWizard(){
 
   return `<div class="stack">
     ${playersBlock('wizard')}
+    ${modePick}
     ${body}
     ${finished && !W.saved ? `<div class="winner"><div class="t">Alle ${maxRounds} Runden gespielt</div><div class="s">Speichern, damit es in der Bestenliste landet.</div><div class="row" style="justify-content:center;margin-top:10px"><button class="btn solid" data-act="w-finish">Ergebnis speichern</button></div></div>` : ''}
     ${W.saved ? winnerCard('wizard', W.saved) : ''}
@@ -1425,11 +1452,12 @@ app.addEventListener('click', async e => {
   }
   if (a === 'w-cloud-d') { if (W.draft.cloud) { W.draft.cloud.d = +el.dataset.d; save(); render(); } return; }
   if (a === 'w-back') { W.cur = W.rounds.length; W.draft = {bids:{}, tricks:{}}; save(); render(); return; }
+  if (a === 'w-zero') { if (W.rounds.length === 0 && !W.saved) { W.zero = el.dataset.v === '1'; S.wizardZero = W.zero; save(); render(); } return; }
   if (a === 'w-new') { S.wizard = freshWizard(S.players); save(); render(); return; }
   if (a === 'w-finish') {
     const t = wTotals(W);
     const res = buildResult('wizard', W.players.map(p => ({name:p, score:t[p]})));
-    W.saved = res; W.cur = W.rounds.length; save(); render(); confetti(); await recordGame({...res, detail:{players:[...W.players], rounds:JSON.parse(JSON.stringify(W.rounds))}}); return;
+    W.saved = res; W.cur = W.rounds.length; save(); render(); confetti(); await recordGame({...res, detail:{players:[...W.players], rounds:JSON.parse(JSON.stringify(W.rounds)), zero:!!W.zero}}); return;
   }
 
   const P = S.padel;
@@ -2101,7 +2129,7 @@ const SHEETS = {
     let body = '<p class="muted">Für dieses Spiel gibt es nur das Ergebnis. Rundendetails werden erst ab diesem Update gespeichert.</p>';
     if (d) {
       const st = g.type === 'kniffel' ? {players:d.players, kniffel:{scores:d.scores, example:false, saved:null}}
-        : g.type === 'wizard' ? {wizard:{players:d.players, rounds:d.rounds, cur:d.rounds.length, draft:{bids:{},tricks:{}}, saved:null}}
+        : g.type === 'wizard' ? {wizard:{players:d.players, rounds:d.rounds, cur:d.rounds.length, draft:{bids:{},tricks:{}}, saved:null, zero:!!d.zero}}
         : g.type === 'flip7' ? {flip7:{players:d.players, rounds:d.rounds, cur:d.rounds.length, draft:{}, target:d.target || 200, saved:null}}
         : {padel:{teams:d.teams, sets:d.sets, pts:[0,0], golden:false, undo:[], done:d.winner ?? null, saved:null, serve:0}};
       body = viewGame('history', g.type, st);
