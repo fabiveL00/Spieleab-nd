@@ -622,7 +622,8 @@ header.top .me-btn .ava.acc:not(.emo):not(.img){background:#fbfbf8;color:#151514
 :root[data-game="kniffel"] .note{background:#fffdf6;border-color:#00000033;color:#4a4036}
 :root[data-game="kniffel"] .note b{color:#1b2847}
 :root[data-game="kniffel"] .chip{box-shadow:0 2px 6px #0003}
-:root[data-game="kniffel"] .label,:root[data-game="kniffel"] .players .label{color:#f3d9d5}
+:root[data-game="kniffel"] #app .label{color:#f3d9d5}
+:root[data-game="kniffel"] #app .winner .label,:root[data-game="kniffel"] #app .note .label{color:var(--muted)}
 :root[data-game="kniffel"] .btn.ghost{background:#fffdf6;border-color:#00000033}
 :root[data-game="kniffel"] .winner{box-shadow:0 10px 28px #00000055}
 
@@ -637,6 +638,48 @@ header.top .me-btn .ava.acc:not(.emo):not(.img){background:#fbfbf8;color:#151514
 .dice-row .die:nth-child(3n+2){transform:rotate(2.5deg)}
 .dice-row.shake .die{transition:transform .07s ease}
 
+/* ===== Regel-Spickzettel ===== */
+.rules{border:1.5px solid var(--rule-strong);border-radius:12px;background:var(--card);margin-bottom:14px;overflow:hidden}
+.rules summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-family:var(--display);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:.03em}
+.rules summary::-webkit-details-marker{display:none}
+.rules summary:focus-visible{outline:2px solid var(--focus);outline-offset:-3px}
+.rules-chev{transition:transform .2s ease;font-size:14px}
+.rules[open] .rules-chev{transform:rotate(180deg)}
+.rules-body{padding:2px 16px 14px;border-top:1px solid var(--rule);font-size:14px;line-height:1.5}
+.rules-body h4{margin:12px 0 4px;font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.rules-body ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+:root[data-game="wizard"] .rules{border-color:var(--gold)}
+:root[data-game="padel"] .rules{background:#07182c;border:2px solid #fff;color:#fff}
+:root[data-game="padel"] .rules-body{border-top-color:#ffffff26}
+:root[data-game="padel"] .rules-body h4{color:var(--ball)}
+:root[data-game="flip7"] .rules{border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+:root[data-game="flip7"] .rules summary{font-weight:400;font-size:16px}
+:root[data-game="kniffel"] .rules{background:#fffdf6;border-color:#2a1416;box-shadow:0 8px 22px #00000044}
+@media (min-width:1180px){
+  .rules{position:fixed;right:24px;top:calc(76px + env(safe-area-inset-top,0px));width:320px;max-height:calc(100vh - 110px);overflow:auto;z-index:15;margin:0;box-shadow:0 10px 30px #0003}
+}
+
+/* ===== Abschlussfoto ===== */
+.photo-task{display:flex;flex-direction:column;gap:12px;align-items:stretch;text-align:center}
+.pt-kicker{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.photo-task h2{font-size:34px}
+.photo-task p{margin:0;color:var(--muted);font-size:14.5px}
+.photo-task p b{color:var(--ink)}
+.pt-frame{position:relative;height:170px;border-radius:14px;background:var(--soft);margin-block:4px}
+.pt-frame span{position:absolute;width:34px;height:34px;border:4px solid var(--ink)}
+.pt-frame span:nth-child(1){top:14px;left:14px;border-right:0;border-bottom:0;border-top-left-radius:10px}
+.pt-frame span:nth-child(2){top:14px;right:14px;border-left:0;border-bottom:0;border-top-right-radius:10px}
+.pt-frame span:nth-child(3){bottom:14px;left:14px;border-right:0;border-top:0;border-bottom-left-radius:10px}
+.pt-frame span:nth-child(4){bottom:14px;right:14px;border-left:0;border-top:0;border-bottom-right-radius:10px}
+.pt-actions{display:flex;flex-direction:column;gap:8px}
+.pt-actions .btn{justify-content:center;width:100%}
+.big-btn{padding:15px 14px;font-size:16px}
+.pt-preview{width:100%;max-height:52vh;object-fit:contain;border-radius:12px;background:#000}
+.pt-skip{align-self:center}
+.gp-img{width:100%;max-height:60vh;object-fit:contain;border-radius:12px;background:#000;display:block}
+.gp-img.loading{height:160px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--soft)}
+
+.has-photo{font-weight:700;color:var(--ink)}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (max-width:420px){
   .team-row,.court-head{grid-template-columns:1fr repeat(3,32px) 66px}
@@ -790,13 +833,14 @@ async function flush(){
   flushing = false;
 }
 async function sync(){
-  await flush(); await fetchRemote(); if (typeof fetchProfiles === 'function') await fetchProfiles(); rebuildHistory(); setSync();
+  await flush(); if (typeof flushPhotos === 'function') await flushPhotos(); await fetchRemote(); if (typeof fetchPhotoIndex === 'function') await fetchPhotoIndex(); if (typeof fetchProfiles === 'function') await fetchProfiles(); rebuildHistory(); setSync();
   if (S.tab === 'board') render();
 }
 async function recordGame(g){
   g.id = uid(); g.ts = Date.now();
   pending.push(g); store(LS_PENDING, pending); rebuildHistory(); setSync();
   sync();
+  if (typeof askForPhoto === 'function') askForPhoto(g);
 }
 async function deleteGame(id){
   if (pending.some(p => p.id === id)) {
@@ -1319,7 +1363,7 @@ function renderBoard(){
     ${list.length ? `<div><div class="label" style="margin-bottom:4px">Letzte Spiele</div><div class="log">
       ${list.slice(0,30).map(g => `<div class="log-item">
         <span class="type">${TYPE_LABEL[g.type] || g.type}</span>
-        <span class="res clickable-res" data-act="game-detail" data-id="${esc(g.id)}" role="button" tabindex="0"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}</span></span>
+        <span class="res clickable-res" data-act="game-detail" data-id="${esc(g.id)}" role="button" tabindex="0"><b>${esc(g.winners.join(' & '))}</b> gewinnt · ${g.ranking.map(r => `${esc(r.name)} ${r.score}`).join(', ')}<br><span class="when">${fmt(g.ts)}${g._pending ? ' · noch nicht gesendet' : ''}${typeof hasGamePhoto === 'function' && hasGamePhoto(g.id) ? ' · <span class="has-photo">Foto</span>' : ''}</span></span>
         <button class="x" data-act="del-game" data-id="${esc(g.id)}" aria-label="Spiel löschen" title="Spiel löschen">×</button>
       </div>`).join('')}
     </div></div>` : ''}
@@ -1394,7 +1438,7 @@ function render(){
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', '#151514'));
   const app = $('#app');
   if (typeof updateWake === 'function') updateWake();
-  app.innerHTML = S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : S.tab === 'flip7' ? renderFlip() : S.tab === 'board' ? renderBoard() : renderHome();
+  app.innerHTML = (typeof rulesPanel === 'function' ? rulesPanel(S.tab) : '') + (S.tab === 'kniffel' ? renderKniffel() : S.tab === 'wizard' ? renderWizard() : S.tab === 'padel' ? renderPadel() : S.tab === 'flip7' ? renderFlip() : S.tab === 'board' ? renderBoard() : renderHome());
 }
 
 function goTo(tab){
@@ -2470,6 +2514,200 @@ async function exportBoard(){
   setTimeout(() => URL.revokeObjectURL(url), 4000);
   toast('Bild gespeichert.');
 }
+
+/* =====================================================================
+   Regel-Spickzettel (aufklappbar) und Abschlussfoto nach jedem Spiel
+   ===================================================================== */
+const RULES = {
+  kniffel: `
+    <h4>Ablauf</h4>
+    <ul><li>5 Würfel, pro Zug bis zu 3 Würfe. Nach jedem Wurf beliebige Würfel liegen lassen.</li>
+    <li>Nach dem Zug genau ein Feld eintragen. Jedes Feld nur einmal. Passt nichts, wird ein Feld gestrichen (0).</li>
+    <li>Nach 13 Runden ist der Block voll. Höchste Summe gewinnt.</li></ul>
+    <h4>Oben</h4>
+    <ul><li>Einser bis Sechser: nur die Augen dieser Zahl zählen.</li>
+    <li>Bonus <b>+35</b>, wenn oben mindestens <b>63</b> erreicht sind (z. B. je dreimal jede Zahl).</li></ul>
+    <h4>Unten</h4>
+    <ul><li>Dreierpasch / Viererpasch: 3 bzw. 4 gleiche, es zählen <b>alle</b> Augen.</li>
+    <li>Full House: 3 + 2 gleiche = <b>25</b>.</li>
+    <li>Kleine Straße: 4 in Folge = <b>30</b>. Große Straße: 5 in Folge = <b>40</b>.</li>
+    <li>Kniffel: 5 gleiche = <b>50</b>. Chance: alle Augen, ohne Bedingung.</li></ul>`,
+  wizard: `
+    <h4>Karten</h4>
+    <ul><li>60 Karten: 4 Farben mit 1–13, dazu 4 Zauberer und 4 Narren.</li>
+    <li>Runde 1 eine Karte pro Kopf, jede Runde eine mehr. Rundenzahl = 60 ÷ Spieler.</li></ul>
+    <h4>Trumpf</h4>
+    <ul><li>Nächste Karte vom Stapel aufdecken: ihre Farbe ist Trumpf.</li>
+    <li>Zauberer aufgedeckt: Geber bestimmt Trumpf. Narr aufgedeckt: kein Trumpf. Letzte Runde: kein Trumpf.</li></ul>
+    <h4>Stiche</h4>
+    <ul><li>Reihum links vom Geber ansagen, wie viele Stiche man macht.</li>
+    <li>Farbe bedienen ist Pflicht. Zauberer und Narr darf man immer spielen.</li>
+    <li>Erster Zauberer gewinnt den Stich, sonst höchster Trumpf, sonst höchste Karte der ausgespielten Farbe. Nur Narren: der erste Narr gewinnt.</li></ul>
+    <h4>Punkte</h4>
+    <ul><li>Ansage getroffen: <b>20 + 10 je Stich</b>. Daneben: <b>−10 je Stich</b> Abweichung.</li>
+    <li><b>Null-Risiko</b> (Hausregel, vor dem Spiel wählbar): 0 angesagt und 0 gemacht = +10 × Runde, sonst −10 × Runde.</li>
+    <li><b>Wolke</b> (Jubiläumsausgabe): Wer den Stich mit der Wolke gewinnt, muss seine Ansage um 1 erhöhen oder senken.</li></ul>`,
+  flip7: `
+    <h4>Ziel</h4>
+    <ul><li>Wer zuerst <b>200 Punkte</b> hat, gewinnt (am Ende der Runde).</li></ul>
+    <h4>Zug</h4>
+    <ul><li>Reihum eine Karte ziehen oder aufhören und die Punkte sichern.</li>
+    <li>Zieht man eine Zahl, die man schon vor sich hat: <b>raus</b>, 0 Punkte in dieser Runde.</li>
+    <li><b>Flip 7</b>: 7 verschiedene Zahlen = <b>+15</b>, die Runde endet sofort für alle.</li></ul>
+    <h4>Sonderkarten</h4>
+    <ul><li><b>Freeze</b>: Ein Spieler muss sofort aufhören und sichert seine Punkte.</li>
+    <li><b>Flip Three</b>: Ein Spieler muss 3 Karten ziehen.</li>
+    <li><b>Second Chance</b>: rettet einmal vor einer doppelten Zahl.</li></ul>
+    <h4>Wertung</h4>
+    <ul><li>Zahlen addieren, <b>×2</b> verdoppelt nur die Zahlen, dann <b>+2 bis +10</b> dazu, bei Flip 7 noch +15.</li></ul>`,
+  padel: `
+    <h4>Zählen</h4>
+    <ul><li>Wie Tennis: 15, 30, 40, Spiel. Bei 40:40 Einstand und Vorteil, oder <b>Golden Point</b>: ein Punkt entscheidet, das rückschlagende Team wählt die Seite.</li>
+    <li>Satz bis <b>6 Spiele</b> mit 2 Vorsprung. Bei 6:6 <b>Tiebreak</b> bis 7 mit 2 Vorsprung.</li>
+    <li>Meist Best of 3 Sätze.</li></ul>
+    <h4>Aufschlag</h4>
+    <ul><li>Von unten, Ball hinter der Aufschlaglinie einmal aufprallen lassen und höchstens auf Hüfthöhe treffen.</li>
+    <li>Diagonal ins Aufschlagfeld, zwei Versuche.</li></ul>
+    <h4>Wände</h4>
+    <ul><li>Nach dem Aufprall im eigenen Feld darf der Ball von der Wand zurückgespielt werden.</li>
+    <li>Trifft der Ball beim Gegner zuerst die Wand statt den Boden, ist es ein Fehler.</li></ul>`,
+};
+if (!S.rulesOpen) S.rulesOpen = {};
+function rulesPanel(type){
+  if (!RULES[type] || viewMode) return '';
+  return `<details class="rules" data-rules="${type}" ${S.rulesOpen[type] ? 'open' : ''}>
+    <summary><span>Regeln</span><span class="rules-chev" aria-hidden="true">▾</span></summary>
+    <div class="rules-body">${RULES[type]}</div>
+  </details>`;
+}
+document.getElementById('app').addEventListener('toggle', e => {
+  const d = e.target; if (!d.matches || !d.matches('details[data-rules]')) return;
+  if (!!S.rulesOpen[d.dataset.rules] !== d.open) { S.rulesOpen[d.dataset.rules] = d.open; try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(_) {} }
+}, true);
+
+/* ---------- Abschlussfotos ---------- */
+const LS_PHOTO_Q = 'spieleabend.gamephotos.pending.v1', LS_PHOTO_IDX = 'spieleabend.gamephotos.index.v1';
+let photoQueue = load(LS_PHOTO_Q, []);          // [{id, data}] noch nicht hochgeladen
+let photoIndex = new Set(load(LS_PHOTO_IDX, [])); // Spiel-IDs mit Foto auf dem Server
+const photoCache = {};                           // id -> dataURL (nur im Speicher)
+function hasGamePhoto(id){ return photoIndex.has(id) || photoQueue.some(p => p.id === id); }
+function storePhotoQueue(){ try { localStorage.setItem(LS_PHOTO_Q, JSON.stringify(photoQueue)); return true; } catch(e) { return false; } }
+
+// Foto verkleinern: längste Seite 1280 px, JPEG
+async function resizePhoto(file, maxEdge = 1280){
+  if (!file || !/^image\//.test(file.type || 'image/')) throw new Error('Das ist kein Bild.');
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Bild konnte nicht gelesen werden.')); i.src = url; });
+    const k = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    let q = 0.8, out = c.toDataURL('image/jpeg', q);
+    while (out.length > 900000 && q > 0.4) { q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+    return out;
+  } finally { URL.revokeObjectURL(url); }
+}
+async function fetchPhotoIndex(){
+  try {
+    const rows = await sb('/rest/v1/game_photos?select=game_id');
+    photoIndex = new Set((rows || []).map(r => r.game_id)); store(LS_PHOTO_IDX, [...photoIndex]);
+  } catch(e) { /* Tabelle fehlt oder offline */ }
+}
+async function flushPhotos(){
+  if (!pin || !photoQueue.length) return;
+  for (const ph of [...photoQueue]) {
+    try {
+      await rpc('set_game_photo', {p_pin: pin, p_id: ph.id, p_data: ph.data});
+      photoQueue = photoQueue.filter(x => x.id !== ph.id); storePhotoQueue();
+      photoIndex.add(ph.id); store(LS_PHOTO_IDX, [...photoIndex]); photoCache[ph.id] = ph.data;
+    } catch(e) { break; }
+  }
+}
+async function saveGamePhoto(id, data){
+  photoCache[id] = data;
+  photoQueue = photoQueue.filter(x => x.id !== id); photoQueue.push({id, data});
+  const stored = storePhotoQueue();
+  await flushPhotos();
+  const done = !photoQueue.some(x => x.id === id);
+  toast(done ? 'Abschlussfoto gespeichert.' : stored ? 'Foto gemerkt. Wird hochgeladen, sobald Internet und PIN da sind.' : 'Foto zu groß für den Zwischenspeicher. Bitte mit Internet erneut versuchen.');
+  if (!stored && !done) photoQueue = photoQueue.filter(x => x.id !== id);
+  if (S.tab === 'board') render();
+}
+async function deleteGamePhoto(id){
+  if (!pin) { toast('Zum Löschen den Gruppen-PIN eingeben.'); return false; }
+  try {
+    await rpc('set_game_photo', {p_pin: pin, p_id: id, p_data: null});
+    photoIndex.delete(id); store(LS_PHOTO_IDX, [...photoIndex]); delete photoCache[id];
+    photoQueue = photoQueue.filter(x => x.id !== id); storePhotoQueue();
+    toast('Foto gelöscht.'); return true;
+  } catch(e) { toast('Nicht gelöscht: ' + errText(e)); return false; }
+}
+async function loadGamePhoto(id){
+  if (photoCache[id]) return photoCache[id];
+  const q = photoQueue.find(x => x.id === id); if (q) return q.data;
+  try {
+    const rows = await sb(`/rest/v1/game_photos?game_id=eq.${encodeURIComponent(id)}&select=data`);
+    if (rows && rows[0]) { photoCache[id] = rows[0].data; return rows[0].data; }
+  } catch(e) {}
+  return null;
+}
+// Nach jedem gespeicherten Spiel: Pop-up mit Foto-Auftrag
+function askForPhoto(g){
+  setTimeout(() => { if (!sheetView) openSheet({kind:'photo', id: g.id, type: g.type, winners: g.winners, fresh: true}); }, 1400);
+}
+
+SHEETS.photo = function(v){
+  const g = history.find(x => x.id === v.id) || {type: v.type, winners: v.winners || [], ts: Date.now()};
+  const cam = `<label class="btn solid file-btn big-btn">Foto aufnehmen<input type="file" accept="image/*" capture="environment" id="gp-cam" hidden></label>`;
+  const lib = `<label class="btn file-btn">Aus Fotos wählen<input type="file" accept="image/*" id="gp-file" hidden></label>`;
+  return `<div class="photo-task">
+    <div class="pt-kicker">${v.fresh ? 'Spiel gespeichert' : 'Foto zum Spiel'}</div>
+    <h2>Abschlussfoto!</h2>
+    <p>${v.fresh ? `Alle zusammenrücken, ${g.winners.length ? `<b>${esc(g.winners.join(' & '))}</b> in die Mitte.` : 'Gewinner in die Mitte.'} Das Foto hängt danach an diesem ${TYPE_LABEL[g.type] || 'Spiel'} im Verlauf.` : `Foto für ${TYPE_LABEL[g.type] || 'dieses Spiel'} vom ${fmtDate(g.ts)}.`}</p>
+    ${v.data ? `<img class="pt-preview" src="${v.data}" alt="Vorschau Abschlussfoto">
+      <div class="row between">${lib.replace('Aus Fotos wählen','Anderes wählen')}<button class="btn solid" data-x="gp-save" ${v.busy ? 'disabled' : ''}>Speichern</button></div>`
+      : `<div class="pt-frame" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div class="pt-actions">${cam}${lib}</div>`}
+    <button class="btn ghost small pt-skip" data-x="gp-skip">${v.data ? 'Verwerfen' : 'Heute ohne Foto'}</button>
+  </div>`;
+};
+
+// Verlauf-Ansicht um das Foto ergänzen
+const _gameSheet = SHEETS.game;
+SHEETS.game = function(v){
+  const html = _gameSheet(v);
+  const has = hasGamePhoto(v.id);
+  if (has && v.photo === undefined && !v.loadingPhoto) {
+    v.loadingPhoto = true;
+    loadGamePhoto(v.id).then(d => { v.photo = d; v.loadingPhoto = false; if (sheetView === v) renderSheet(); });
+  }
+  const photo = has
+    ? (v.photo ? `<img class="gp-img" src="${v.photo}" alt="Abschlussfoto">` : `<div class="gp-img loading">Foto lädt …</div>`)
+    : '';
+  const actions = `<div class="row">
+      <button class="btn small" data-x="gp-open" data-id="${esc(v.id)}">${has ? 'Foto ändern' : 'Foto hinzufügen'}</button>
+      ${has ? `<button class="btn ghost small" data-x="gp-del" data-id="${esc(v.id)}">Foto löschen</button>` : ''}</div>`;
+  return photo + html + actions;
+};
+
+sheetEl.addEventListener('click', async e => {
+  const el = e.target.closest('[data-x]'); if (!el || !sheetView) return;
+  const x = el.dataset.x, v = sheetView;
+  if (x === 'gp-skip') { closeSheet(); return; }
+  if (x === 'gp-open') { openSheet({kind:'photo', id: el.dataset.id}); return; }
+  if (x === 'gp-del') { if (await deleteGamePhoto(el.dataset.id)) { v.photo = undefined; renderSheet(); if (S.tab === 'board') render(); } return; }
+  if (x === 'gp-save') {
+    if (!v.data) return; v.busy = true; renderSheet();
+    await saveGamePhoto(v.id, v.data); closeSheet();
+  }
+});
+sheetEl.addEventListener('change', async e => {
+  if (e.target.id !== 'gp-cam' && e.target.id !== 'gp-file') return;
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  try { sheetView.data = await resizePhoto(f); renderSheet(); }
+  catch(err) { toast(err.message || 'Bild konnte nicht gelesen werden.'); }
+});
 
 render();
 setSync();
